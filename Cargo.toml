@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "crates/ccl-core",
+    "crates/ccl-cli"
+]
+resolver = "2"

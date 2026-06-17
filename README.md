@@ -82,3 +82,12 @@ Optional internal codename: **Cerebro**
 ## License
 
 No license has been selected yet.
+
+## Local Development
+
+```powershell
+cargo fmt --check
+cargo test
+cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json
+cargo run -p ccl-cli -- preflight --repo .
+```
