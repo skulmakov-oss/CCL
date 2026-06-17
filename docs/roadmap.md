@@ -23,6 +23,8 @@ Completion criterion:
 
 Goal: create a local deterministic CCL core before any UI work.
 
+Status: seeded by the initial Rust CLI core gate.
+
 Expected commands:
 
 ```text
