@@ -59,7 +59,7 @@ Not performed.
 
 ## Final Verdict Block
 
-```markdown
+````markdown
 ### Final Verdict
 
 ```text
@@ -113,7 +113,7 @@ Final status:
 - task completed / not completed
 - safe to proceed: YES / NO
 ```
-```
+````
 
 ## Invalid Report Conditions
 
