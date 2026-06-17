@@ -10,7 +10,8 @@ Status: PASS WITH WARNINGS
 - Task type: source_pr
 - Branch: phase1/cli-core-seed
 - PR: https://github.com/skulmakov-oss/CCL/pull/2
-- Commit(s): PR #2 head before merge; final merge commit to be recorded after merge.
+- Merge commit: 449b5d86740122f188bfc64d46058ff839fb0605
+- Final main HEAD after merge: 449b5d86740122f188bfc64d46058ff839fb0605
 
 ### Basis
 
