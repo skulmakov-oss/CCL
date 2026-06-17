@@ -46,6 +46,15 @@ The first CCL prototype is expected to focus on:
 - local Admission Guard integration;
 - PASS / PASS WITH WARNINGS / FAIL verdict classification.
 
+## Repository Map
+
+- [`docs/architecture.md`](docs/architecture.md) — core architecture and components.
+- [`docs/task-contract.md`](docs/task-contract.md) — task contract model and hard rules.
+- [`docs/agent-report-format.md`](docs/agent-report-format.md) — required execution report structure.
+- [`docs/project-ledger.md`](docs/project-ledger.md) — project ledger rules and entry template.
+- [`docs/roadmap.md`](docs/roadmap.md) — conservative MVP roadmap.
+- [`examples/semantic-task-contract.json`](examples/semantic-task-contract.json) — initial Semantic task contract example.
+
 ## Non-goals
 
 CCL is not:
@@ -69,3 +78,7 @@ The current goal is to define the product identity, architecture skeleton, opera
 Official name: **CCL**  
 Full form: **Cerebral Control Layer**  
 Optional internal codename: **Cerebro**
+
+## License
+
+No license has been selected yet.
