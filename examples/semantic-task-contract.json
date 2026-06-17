@@ -1,0 +1,38 @@
+{
+  "project": "Semantic",
+  "workstream": "R12 UI",
+  "task_type": "source_pr",
+  "objective": "Implement the next minimal UI gate under strict Semantic repository discipline.",
+  "required_context": {
+    "dna": true,
+    "agent_skills": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "crates/prom-ui/**",
+    "docs/roadmap/post_ui/**"
+  ],
+  "forbidden_paths": [
+    "Cargo.toml",
+    "Cargo.lock",
+    ".github/**",
+    "docs/DNA.md",
+    "docs/dna/**"
+  ],
+  "required_validation": [
+    "git diff --check",
+    "git ls-files | Select-String \"pr_body\"",
+    "cargo fmt --check",
+    "cargo test -p prom-ui --lib",
+    "cargo test -p prom-ui",
+    "local_admission_guard"
+  ],
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "All required local validation passed and ledger requirements are satisfied.",
+    "pass_with_warnings": "Core validation passed, but known local environment warnings or non-blocking issues remain.",
+    "fail": "Required validation failed, evidence is missing, forbidden scope was changed, or ledger requirements are not satisfied."
+  }
+}
