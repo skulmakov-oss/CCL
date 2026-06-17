@@ -1,2 +1,2 @@
-# CCL-
+# CCL
 Cerebral Control Lauer 
