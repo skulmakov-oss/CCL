@@ -23,6 +23,8 @@ Admit only from captured evidence.
 
 The goal of this gate is not to understand tool output yet. The goal is to prove that CCL can launch a command, bound its execution, capture stdout/stderr, record environment context, compute hashes, and persist a reproducible evidence artifact.
 
+This gate must treat the existing Local Admission Guard as a real validation backend. CCL must not replace it in this seed. CCL must prove that it can capture the Local Admission Guard run as evidence.
+
 ---
 
 ## 2. Non-goals
@@ -30,7 +32,8 @@ The goal of this gate is not to understand tool output yet. The goal is to prove
 This gate must not implement:
 
 - `ccl gate run`;
-- full Admission Guard;
+- full CCL Admission Layer;
+- replacement or reimplementation of the existing Local Admission Guard;
 - scope/diff policy engine;
 - Diagnostic Extractors;
 - Failure Capsule;
@@ -45,7 +48,34 @@ This is a low-level sensor gate only.
 
 ---
 
-## 3. Expected CLI
+## 3. Existing Local Admission Guard Relationship
+
+The project already has a functional Local Admission Guard that acts as a fast local CI / validator backend.
+
+CCL must treat that existing guard as an external validation command in this seed.
+
+Correct relationship:
+
+```text
+Local Admission Guard checks.
+CCL Capture proves the check happened.
+CCL Evidence Manifest preserves the proof.
+CCL Verdict later decides admission.
+```
+
+This means:
+
+- CCL must not claim to replace the Local Admission Guard in this gate;
+- CCL must not trust a handwritten agent report that says the guard passed;
+- CCL must capture the Local Admission Guard process execution as evidence;
+- captured evidence must include command, cwd, env snapshot/hash, stdout/stderr, exit code, timeout/output-limit status, and artifact hashes;
+- GitHub CI remains secondary metadata, not final evidence.
+
+The first production-like capture target for this gate should be the existing Local Admission Guard, not only a trivial command such as `cargo --version`.
+
+---
+
+## 4. Expected CLI
 
 Add a new CLI command:
 
@@ -59,6 +89,14 @@ Optional timeout form:
 cargo run -p ccl-cli -- capture --id cargo-test --repo . --wall-timeout 300 -- cargo test
 ```
 
+Production-like Local Admission Guard capture form:
+
+```powershell
+cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- <local-admission-guard-command>
+```
+
+The exact Local Admission Guard command is repository-specific and must be documented by the implementation agent in the final report.
+
 The command after `--` must be treated as argv:
 
 ```text
@@ -66,11 +104,11 @@ program = cargo
 args = ["test"]
 ```
 
-Shell execution must not be the default.
+Shell execution must not be the default. If a shell or script runner is needed, it must appear explicitly as the program in argv and be justified in the final report.
 
 ---
 
-## 4. Artifact Layout
+## 5. Artifact Layout
 
 The command must create a run directory:
 
@@ -91,7 +129,7 @@ The generated `.ccl/runs/**` content must remain local runtime output and must n
 
 ---
 
-## 5. Required Captured Fields
+## 6. Required Captured Fields
 
 `command.json` should record:
 
@@ -140,11 +178,13 @@ The generated `.ccl/runs/**` content must remain local runtime output and must n
 - repo path;
 - command evidence list;
 - aggregate status;
-- artifact paths.
+- artifact paths;
+- whether the Local Admission Guard was captured;
+- path to the Local Admission Guard command result if captured.
 
 ---
 
-## 6. Timeout Policy
+## 7. Timeout Policy
 
 Every captured command must be bounded.
 
@@ -180,7 +220,7 @@ The MVP may use a simpler cross-platform approach, but the code and docs must no
 
 ---
 
-## 7. Environment Evidence
+## 8. Environment Evidence
 
 Environment is part of the evidence surface.
 
@@ -205,7 +245,7 @@ CARGO_TARGET_DIR
 
 ---
 
-## 8. Output Streaming and Size Limits
+## 9. Output Streaming and Size Limits
 
 CCL must not buffer full stdout/stderr in memory.
 
@@ -285,7 +325,7 @@ Capture must be streaming, bounded, hashed, and backpressure-safe.
 
 ---
 
-## 9. Expected Code Scope
+## 10. Expected Code Scope
 
 Allowed files:
 
@@ -318,7 +358,7 @@ examples/**
 
 ---
 
-## 10. Dependency Policy
+## 11. Dependency Policy
 
 Keep dependencies minimal and explicit.
 
@@ -346,7 +386,7 @@ No dependency should be added for UI, async orchestration, LLM calls, GitHub API
 
 ---
 
-## 11. Required Tests
+## 12. Required Tests
 
 Add tests for:
 
@@ -375,7 +415,7 @@ Tests must avoid relying on network access.
 
 ---
 
-## 12. Required Validation
+## 13. Required Validation
 
 After implementation, run locally:
 
@@ -388,14 +428,19 @@ cargo run -p ccl-cli -- --version
 cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json
 cargo run -p ccl-cli -- preflight --repo .
 cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version
+cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- <local-admission-guard-command>
 cargo clippy --all-targets --all-features -- -D warnings
 ```
+
+The implementation agent must replace `<local-admission-guard-command>` with the real repository command and report the exact command used.
+
+The Local Admission Guard capture is required as the production-like proof command for this gate. `cargo --version` is only a smoke test for trivial command capture.
 
 Do not use GitHub CI as validation evidence.
 
 ---
 
-## 13. Ledger Requirement
+## 14. Ledger Requirement
 
 Update `ledger/project-ledger.md` with a new entry for this gate.
 
@@ -405,12 +450,12 @@ Status should be:
 PASS WITH WARNINGS
 ```
 
-unless a real CCL Admission Guard exists by the time this gate is completed.
+unless the implementation also includes a complete CCL-owned admission layer that can compute the final project verdict from captured evidence.
 
-Expected warning:
+Expected warning for this seed:
 
 ```text
-CCL local Admission Guard is not implemented yet.
+Existing Local Admission Guard is available and must be captured as validation evidence, but the full CCL admission layer is not implemented yet.
 ```
 
 The ledger must record:
@@ -420,6 +465,8 @@ The ledger must record:
 - changed files;
 - validation results;
 - command capture proof command;
+- Local Admission Guard capture command;
+- Local Admission Guard capture result;
 - artifact shape;
 - streaming stdout/stderr behavior;
 - output byte limits;
@@ -427,9 +474,16 @@ The ledger must record:
 - backpressure/deadlock test result;
 - next recommended gate.
 
+Ledger must explicitly state:
+
+```text
+Local Admission Guard executed through CCL capture: YES / NO
+GitHub CI used as evidence: NO
+```
+
 ---
 
-## 14. Expected Final Report
+## 15. Expected Final Report
 
 The implementation agent must report:
 
@@ -439,6 +493,9 @@ Commands run
 Validation results
 Capture artifact path
 Example result.json summary
+Local Admission Guard command captured: YES / NO
+Local Admission Guard exact command: <command>
+Local Admission Guard capture result: PASS / FAIL / NOT RUN, with reason
 Streaming stdout/stderr: YES / NO
 Output byte limits enforced: YES / NO
 Timeout stream drain bounded: YES / NO
@@ -452,13 +509,15 @@ No `PASS` may be claimed without local validation output.
 
 ---
 
-## 15. Next Gate After This
+## 16. Next Gate After This
 
 After Command Evidence Capture Seed, the next likely gate is:
 
 ```text
 Evidence Manifest + Contract-bound Validation Runner
 ```
+
+That next gate should use the existing Local Admission Guard as one of the primary validation backends while CCL owns orchestration, evidence persistence, and verdict inputs.
 
 Only after that should CCL grow toward:
 
