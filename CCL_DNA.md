@@ -61,6 +61,10 @@ Every CCL-controlled command must have bounded execution. A command that can han
 
 The agent can request a gate run. CCL owns the gate.
 
+### 2.7 Capture must be streaming, bounded, hashed, and backpressure-safe
+
+CCL must not protect truth by building a fragile capture path. Command output must be streamed, size-bounded, hashed as it is persisted, and read in a way that cannot deadlock on stdout/stderr backpressure.
+
 ---
 
 ## 3. Vocabulary
@@ -308,6 +312,8 @@ CCL must launch validation commands as parent process and capture:
 - stderr path;
 - stdout hash;
 - stderr hash;
+- output byte counters;
+- output truncation status;
 - process termination metadata.
 
 Example artifact shape:
@@ -407,6 +413,48 @@ CARGO_ENCODED_RUSTFLAGS
 RUST_TEST_THREADS
 RUST_BACKTRACE
 CARGO_TARGET_DIR
+```
+
+### 9.5 Streaming output and backpressure safety
+
+CCL must not buffer full stdout/stderr in memory.
+
+Captured output must be streamed to disk in chunks while rolling hashes and byte counters are updated.
+
+Required model:
+
+```text
+child stdout pipe -> chunk reader -> stdout.txt -> rolling sha256
+child stderr pipe -> chunk reader -> stderr.txt -> rolling sha256
+```
+
+stdout and stderr must be read concurrently. Sequential reading can deadlock if the child process fills the ignored pipe while the parent waits on the other stream.
+
+The capture path should track:
+
+- stdout bytes;
+- stderr bytes;
+- combined output bytes;
+- stdout complete / truncated;
+- stderr complete / truncated;
+- output limit exceeded;
+- max stdout bytes;
+- max stderr bytes;
+- max combined output bytes;
+- hash scope: saved bytes only when truncated.
+
+If output limits are exceeded:
+
+```text
+FAIL — output_limit_exceeded
+```
+
+Hashes must describe the bytes actually saved to disk, not imagined full output that CCL did not persist.
+
+Principle:
+
+```text
+Capture must be streaming, bounded, hashed, and backpressure-safe.
 ```
 
 ---
@@ -624,6 +672,7 @@ Examples:
 | Required validation missing | FAIL |
 | Required validation exit code non-zero | FAIL |
 | Required command timed out | FAIL |
+| Command output limit exceeded | FAIL |
 | Ledger required but missing | FAIL |
 | Unresolved ledger placeholder | FAIL |
 | Admission Guard unavailable but explicitly expected in seed gate | PASS WITH WARNINGS |
@@ -675,6 +724,8 @@ Risks:
 - environment manipulation;
 - process tricks;
 - prompt injection through logs;
+- output flood / log spam;
+- stdout/stderr pipe deadlock exploitation;
 - ledger tampering.
 
 Controls required beyond MVP:
@@ -730,6 +781,9 @@ Prefer:
 - stable JSON artifacts;
 - path canonicalization;
 - bounded execution;
+- streaming output capture;
+- rolling hashes;
+- byte counters;
 - conservative defaults;
 - minimal dependencies.
 
@@ -738,6 +792,9 @@ Avoid:
 - magical inference;
 - free-form LLM summaries as truth;
 - implicit shell execution;
+- full stdout/stderr buffering in memory;
+- sequential pipe reading that can deadlock;
+- unbounded output files;
 - broad globs;
 - hidden state;
 - silent warnings;
@@ -758,6 +815,7 @@ Future `ccl gate run` should use stable exit codes:
 | 30 | CONTRACT FAIL |
 | 40 | CCL INTERNAL ERROR |
 | 50 | TIMEOUT / EXECUTION CONTROL FAILURE |
+| 51 | OUTPUT LIMIT EXCEEDED |
 
 Compatibility flags may be added later, but internal meaning should remain stable.
 
@@ -773,8 +831,9 @@ Compatibility flags may be added later, but internal meaning should remain stabl
 6. Forbidden scope wins over allowed scope.
 7. A weak contract cannot produce a strong verdict.
 8. No bounded execution, no trusted capture.
-9. No ledger handling, no completed gate.
-10. Only evidence can admit.
+9. Capture must be streaming, bounded, hashed, and backpressure-safe.
+10. No ledger handling, no completed gate.
+11. Only evidence can admit.
 
 ---
 
