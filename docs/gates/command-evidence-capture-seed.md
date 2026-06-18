@@ -166,6 +166,10 @@ exit_code = null
 
 Partial stdout/stderr must still be saved and hashed.
 
+After timeout termination, stdout/stderr reader threads must complete deterministically. They should drain any final bytes until EOF after the child process is killed or terminated, then flush files and finalize hashes.
+
+The implementation must not wait forever for stream readers after timeout. Reader joins and post-kill stream draining must be bounded by a small internal deadline. If stream draining or reader shutdown cannot complete, the command result must remain `FAIL` and record an explicit failure class such as `stream_drain_failed` or `io_error`.
+
 Target behavior for future hardening:
 
 - terminate whole process tree;
@@ -316,14 +320,27 @@ examples/**
 
 ## 10. Dependency Policy
 
-Keep dependencies minimal.
+Keep dependencies minimal and explicit.
 
-Possible dependency needs:
+Allowed / preferred dependency choices for this gate:
 
-- SHA-256 hashing;
-- timestamp generation;
-- JSON serialization already present;
-- temporary directory support for tests if needed.
+- `sha2 = "0.10"` for SHA-256 hashing;
+- `hex = "0.4"` for digest encoding;
+- existing `serde` / `serde_json` for artifact serialization;
+- `std::time::SystemTime` for MVP timestamps;
+- `tempfile` as a dev-dependency only, if needed for stable tests.
+
+Avoid adding `chrono` in this seed unless there is a clear documented need. Human-friendly timestamp formatting can be added later.
+
+Do not add:
+
+- Tokio or another async runtime;
+- command wrapper frameworks;
+- UI dependencies;
+- LLM or API client dependencies;
+- GitHub API dependencies;
+- sandbox/container orchestration dependencies;
+- broad logging/tracing frameworks unless explicitly justified.
 
 No dependency should be added for UI, async orchestration, LLM calls, GitHub API, or sandboxing in this gate.
 
@@ -343,7 +360,16 @@ Add tests for:
 8. stdout/stderr are streamed to disk rather than buffered as a full in-memory result;
 9. output byte counters are recorded;
 10. output limits produce `FAIL` with `output_limit_exceeded` if feasible in a stable test;
-11. truncated output is explicitly marked incomplete and hashed as saved bytes only.
+11. truncated output is explicitly marked incomplete and hashed as saved bytes only;
+12. stdout/stderr are read concurrently enough to avoid pipe deadlock.
+
+Backpressure/deadlock test requirement:
+
+- add a deterministic test helper that writes more than a typical OS pipe buffer to stdout and stderr;
+- the helper should produce enough output to expose sequential-reader deadlocks, for example `1 MiB` to stdout and `1 MiB` to stderr;
+- the capture must complete under a bounded timeout when both streams are pumped concurrently;
+- the test should avoid Python/Bash dependency by default. Prefer a Rust test helper, current test binary mode, or another cross-platform Rust-controlled helper;
+- if an external interpreter is used, the test must be gated and must not be the only proof of backpressure safety.
 
 Tests must avoid relying on network access.
 
@@ -397,6 +423,8 @@ The ledger must record:
 - artifact shape;
 - streaming stdout/stderr behavior;
 - output byte limits;
+- timeout stream-drain behavior;
+- backpressure/deadlock test result;
 - next recommended gate.
 
 ---
@@ -413,6 +441,8 @@ Capture artifact path
 Example result.json summary
 Streaming stdout/stderr: YES / NO
 Output byte limits enforced: YES / NO
+Timeout stream drain bounded: YES / NO
+Backpressure/deadlock test: PASS / FAIL / NOT RUN, with reason
 Ledger status
 PR number
 GitHub CI used as evidence: NO
