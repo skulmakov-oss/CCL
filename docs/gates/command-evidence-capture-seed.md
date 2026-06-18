@@ -101,6 +101,7 @@ The generated `.ccl/runs/**` content must remain local runtime output and must n
 - repo path;
 - cwd;
 - wall timeout;
+- output byte limits;
 - environment policy;
 - created timestamp.
 
@@ -119,6 +120,18 @@ The generated `.ccl/runs/**` content must remain local runtime output and must n
 - stdout SHA-256;
 - stderr SHA-256;
 - env SHA-256;
+- stdout bytes;
+- stderr bytes;
+- combined output bytes;
+- stdout complete: true / false;
+- stderr complete: true / false;
+- stdout truncated: true / false;
+- stderr truncated: true / false;
+- output limit exceeded: true / false;
+- max stdout bytes;
+- max stderr bytes;
+- max combined output bytes;
+- hash scope for each output stream;
 - command artifact path.
 
 `evidence-manifest.json` should include:
@@ -188,7 +201,87 @@ CARGO_TARGET_DIR
 
 ---
 
-## 8. Expected Code Scope
+## 8. Output Streaming and Size Limits
+
+CCL must not buffer full stdout/stderr in memory.
+
+Captured output must be streamed to disk in chunks while updating rolling SHA-256 hashes and byte counters.
+
+Required model:
+
+```text
+child stdout pipe -> chunk reader -> stdout.txt -> rolling sha256
+child stderr pipe -> chunk reader -> stderr.txt -> rolling sha256
+```
+
+The implementation must read stdout and stderr concurrently. Reading one stream while ignoring the other can deadlock the child process when the ignored pipe fills.
+
+Minimum MVP behavior:
+
+- stream stdout to `stdout.txt`;
+- stream stderr to `stderr.txt`;
+- update stdout hash per chunk;
+- update stderr hash per chunk;
+- track stdout bytes;
+- track stderr bytes;
+- track combined output bytes;
+- enforce output byte limits;
+- keep memory usage bounded relative to output size.
+
+Recommended MVP limits:
+
+```json
+{
+  "max_stdout_bytes": 10485760,
+  "max_stderr_bytes": 10485760,
+  "max_combined_output_bytes": 20971520,
+  "on_output_limit": "fail_and_terminate"
+}
+```
+
+If any output limit is exceeded:
+
+```text
+status = FAIL
+failure_class = output_limit_exceeded
+exit_code = null
+```
+
+Partial logs must still be saved and hashed.
+
+If stdout/stderr is truncated, hashes must be computed over the bytes actually saved to disk, not over missing or imagined full output.
+
+Expected result fields:
+
+```json
+{
+  "stdout_bytes": 10485760,
+  "stderr_bytes": 18342,
+  "combined_output_bytes": 10504102,
+  "stdout_complete": false,
+  "stderr_complete": true,
+  "stdout_truncated": true,
+  "stderr_truncated": false,
+  "output_limit_exceeded": true,
+  "max_stdout_bytes": 10485760,
+  "max_stderr_bytes": 10485760,
+  "max_combined_output_bytes": 20971520,
+  "stdout_hash_scope": "saved_bytes_only",
+  "stderr_hash_scope": "saved_bytes_only"
+}
+```
+
+For this seed, `fail_and_terminate` is the preferred behavior. A future gate may add `truncate_and_continue`, but the MVP should be conservative.
+
+Principle:
+
+```text
+Capture must be streaming, bounded, hashed, and backpressure-safe.
+```
+
+---
+
+## 9. Expected Code Scope
 
 Allowed files:
 
@@ -221,7 +314,7 @@ examples/**
 
 ---
 
-## 9. Dependency Policy
+## 10. Dependency Policy
 
 Keep dependencies minimal.
 
@@ -236,7 +329,7 @@ No dependency should be added for UI, async orchestration, LLM calls, GitHub API
 
 ---
 
-## 10. Required Tests
+## 11. Required Tests
 
 Add tests for:
 
@@ -246,13 +339,17 @@ Add tests for:
 4. hashes are present and stable for captured files;
 5. evidence manifest is created;
 6. timeout produces `FAIL` with `timeout_exceeded` if feasible in a stable test;
-7. env snapshot artifact exists.
+7. env snapshot artifact exists;
+8. stdout/stderr are streamed to disk rather than buffered as a full in-memory result;
+9. output byte counters are recorded;
+10. output limits produce `FAIL` with `output_limit_exceeded` if feasible in a stable test;
+11. truncated output is explicitly marked incomplete and hashed as saved bytes only.
 
 Tests must avoid relying on network access.
 
 ---
 
-## 11. Required Validation
+## 12. Required Validation
 
 After implementation, run locally:
 
@@ -272,7 +369,7 @@ Do not use GitHub CI as validation evidence.
 
 ---
 
-## 12. Ledger Requirement
+## 13. Ledger Requirement
 
 Update `ledger/project-ledger.md` with a new entry for this gate.
 
@@ -298,11 +395,13 @@ The ledger must record:
 - validation results;
 - command capture proof command;
 - artifact shape;
+- streaming stdout/stderr behavior;
+- output byte limits;
 - next recommended gate.
 
 ---
 
-## 13. Expected Final Report
+## 14. Expected Final Report
 
 The implementation agent must report:
 
@@ -312,6 +411,8 @@ Commands run
 Validation results
 Capture artifact path
 Example result.json summary
+Streaming stdout/stderr: YES / NO
+Output byte limits enforced: YES / NO
 Ledger status
 PR number
 GitHub CI used as evidence: NO
@@ -321,7 +422,7 @@ No `PASS` may be claimed without local validation output.
 
 ---
 
-## 14. Next Gate After This
+## 15. Next Gate After This
 
 After Command Evidence Capture Seed, the next likely gate is:
 
