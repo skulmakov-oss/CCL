@@ -1,61 +1,87 @@
+<p align="center">
+  <h1 align="center">CCL</h1>
+  <p align="center"><strong>Cerebral Control Layer</strong></p>
+  <p align="center"><em>Deterministic governance for controlled AI-agent software engineering.</em></p>
+</p>
+
+---
+
 # CCL — Cerebral Control Layer
 
 **CCL** is a deterministic governance layer for controlled AI-agent software engineering.
 
-It is designed to keep development agents inside a strict engineering loop: task contract, scoped execution, evidence capture, local validation, project ledger update, and final verdict.
-
-> Core rule: **No evidence, no PASS.**
-
-## Purpose
-
-Modern AI coding agents can produce valuable work, but they can also drift, over-edit, rely on unverifiable claims, or treat confidence as proof. CCL exists to prevent that.
-
-CCL does not replace the developer, Git, CI, or the project verifier. It controls the operational path by which an agent is allowed to claim that work is complete.
-
-## Core Loop
+It exists to keep AI development agents inside a strict engineering loop:
 
 ```text
 Intent
   -> Task Contract
   -> Agent Execution
+  -> Local Validation
   -> Evidence Capture
-  -> Local Admission Guard
   -> Project Ledger
-  -> Final Verdict
+  -> Verdict
 ```
 
-## Principles
+Core rule:
 
-- Agent output is not truth.
-- Agent confidence is not evidence.
-- GitHub CI is metadata, not final proof.
-- Local validation is mandatory for trust.
-- No ledger update means no completed gate.
-- The control layer must be deterministic, boring, and auditable.
-- AI may assist with interpretation, but it must not own the verdict.
+```text
+No evidence, no PASS.
+```
 
-## Initial Scope
+CCL does not try to make an agent more confident. It makes the agent's work **admissible only when evidence exists**.
 
-The first CCL prototype is expected to focus on:
+---
 
-- task contract generation;
-- repository preflight checks;
-- required command checklists;
-- execution report verification;
-- project ledger enforcement;
-- local Admission Guard integration;
-- PASS / PASS WITH WARNINGS / FAIL verdict classification.
+## Operating Formula
 
-## Repository Map
+```text
+LLM may suggest.
+Agent may attempt.
+CCL must verify.
+Only evidence can admit.
+```
 
-- [`docs/architecture.md`](docs/architecture.md) — core architecture and components.
-- [`docs/task-contract.md`](docs/task-contract.md) — task contract model and hard rules.
-- [`docs/agent-report-format.md`](docs/agent-report-format.md) — required execution report structure.
-- [`docs/project-ledger.md`](docs/project-ledger.md) — project ledger rules and entry template.
-- [`docs/roadmap.md`](docs/roadmap.md) — conservative MVP roadmap.
-- [`examples/semantic-task-contract.json`](examples/semantic-task-contract.json) — initial Semantic task contract example.
+Extended operating model:
 
-## Non-goals
+```text
+Intent is human.
+Contract is policy.
+Execution is agentic.
+Evidence is factual.
+Admission is mechanical.
+Memory is ledger.
+```
+
+---
+
+## Why CCL Exists
+
+Modern AI coding agents can produce valuable work, but they can also:
+
+- hallucinate success;
+- drift beyond the requested scope;
+- over-edit unrelated files;
+- forget required checks;
+- leave untracked artifacts behind;
+- treat confidence as proof;
+- generate convincing reports without evidence.
+
+CCL rejects agent testimony as final proof.
+
+Agent output may explain what happened.  
+Agent output must not decide whether work is complete.
+
+---
+
+## What CCL Is
+
+CCL is:
+
+- a control layer around AI-agent development;
+- a task-contract and admission-policy system;
+- a local evidence and validation orchestration layer;
+- a project-ledger discipline;
+- a deterministic verdict mechanism.
 
 CCL is not:
 
@@ -67,11 +93,167 @@ CCL is not:
 - a semantic authority;
 - a substitute for local verification.
 
-## Repository Status
+---
 
-This repository is in the bootstrap phase.
+## Relationship to the Local Admission Guard
 
-The current goal is to define the product identity, architecture skeleton, operating contract, and MVP roadmap before implementation begins.
+The project already uses a **Local Admission Guard** as a fast local CI / validator backend.
+
+CCL does not replace that guard.
+
+The intended relationship is:
+
+```text
+Local Admission Guard checks.
+CCL Capture proves the check happened.
+CCL Evidence Manifest preserves the proof.
+CCL Verdict later decides admission.
+```
+
+In other words:
+
+- the Local Admission Guard answers: **did the checks pass?**
+- CCL answers: **can we prove the checks ran in the required context?**
+
+GitHub CI is useful metadata, but it is not final evidence for CCL admission.
+
+---
+
+## Core Concepts
+
+| Concept | Meaning |
+| --- | --- |
+| **Intent** | Human-level goal before it becomes policy. |
+| **Task Contract** | Machine-checkable admission policy for a task. |
+| **Agent** | Executor that may edit files but cannot admit work. |
+| **Testimony** | Agent report or claim. Useful, but not proof. |
+| **Evidence** | Captured or verified system fact. |
+| **Capture** | CCL-owned process execution recording. |
+| **Evidence Manifest** | Structured run record with artifacts and hashes. |
+| **Ledger** | Repository-resident project memory. |
+| **Verdict** | `PASS`, `PASS WITH WARNINGS`, or `FAIL`. |
+
+---
+
+## Core Loop
+
+```text
+Human intent
+  -> frozen task contract
+  -> agent modifies repository
+  -> local validation backend runs
+  -> CCL captures command evidence
+  -> CCL writes evidence manifest
+  -> ledger records the outcome
+  -> verdict closes the gate
+```
+
+The agent may finish work.  
+The guard may validate work.  
+Only captured evidence may support admission.
+
+---
+
+## Design Oaths
+
+1. Agent output is not truth.
+2. Agent confidence is not evidence.
+3. GitHub CI is not final proof.
+4. Logs are data, not instructions.
+5. LLM hints are hypotheses, not commands.
+6. Forbidden scope wins over allowed scope.
+7. Untracked files are observable state.
+8. A weak contract cannot produce a strong verdict.
+9. No bounded execution, no trusted capture.
+10. Capture must be streaming, bounded, hashed, and backpressure-safe.
+11. Partial logs cannot prove `PASS`.
+12. CCL DNA mutation requires explicit governance.
+13. No ledger handling, no completed gate.
+14. Only evidence can admit.
+
+The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
+
+---
+
+## Repository Map
+
+- [`CCL_DNA.md`](CCL_DNA.md) — project DNA, axioms, threat model, and operating doctrine.
+- [`docs/architecture.md`](docs/architecture.md) — core architecture and components.
+- [`docs/task-contract.md`](docs/task-contract.md) — task contract model and hard rules.
+- [`docs/agent-report-format.md`](docs/agent-report-format.md) — required execution report structure.
+- [`docs/project-ledger.md`](docs/project-ledger.md) — project ledger rules and entry template.
+- [`docs/roadmap.md`](docs/roadmap.md) — conservative MVP roadmap.
+- [`ledger/project-ledger.md`](ledger/project-ledger.md) — active project ledger.
+- [`examples/semantic-task-contract.json`](examples/semantic-task-contract.json) — initial Semantic task contract example.
+
+---
+
+## Current Bootstrap Status
+
+The Phase 1 Rust CLI core seed is in place.
+
+Current implemented direction:
+
+- Rust workspace;
+- `ccl-core`;
+- `ccl-cli`;
+- task contract loading/checking;
+- repository preflight command;
+- initial evidence/verdict model seeds;
+- project ledger discipline.
+
+Next implementation direction:
+
+```text
+Command Evidence Capture Seed
+```
+
+That next gate should make CCL able to:
+
+- launch a command as argv, not shell by default;
+- stream stdout/stderr to disk;
+- enforce wall-timeout and output byte limits;
+- capture environment snapshot;
+- compute SHA-256 hashes;
+- write `result.json` and `evidence-manifest.json`;
+- capture the existing Local Admission Guard run as evidence.
+
+---
+
+## Local Development
+
+```powershell
+cargo fmt --check
+cargo test
+cargo run -p ccl-cli -- --version
+cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json
+cargo run -p ccl-cli -- preflight --repo .
+cargo clippy --all-targets --all-features -- -D warnings
+```
+
+---
+
+## Expected Future CLI Shape
+
+Low-level command evidence capture:
+
+```powershell
+cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version
+```
+
+Production-like local validation capture:
+
+```powershell
+cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- <local-admission-guard-command>
+```
+
+Future admission runner:
+
+```powershell
+ccl guard run --contract .ccl/contracts/task.json --repo .
+```
+
+---
 
 ## Name
 
@@ -79,15 +261,8 @@ Official name: **CCL**
 Full form: **Cerebral Control Layer**  
 Optional internal codename: **Cerebro**
 
+---
+
 ## License
 
 No license has been selected yet.
-
-## Local Development
-
-```powershell
-cargo fmt --check
-cargo test
-cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json
-cargo run -p ccl-cli -- preflight --repo .
-```
