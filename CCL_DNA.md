@@ -124,6 +124,7 @@ Captured stdout/stderr files
 stdout_sha256 / stderr_sha256
 Repo HEAD snapshot
 Changed files from git diff
+Untracked non-ignored files from Git state
 Scope check result
 Ledger consistency check result
 ```
@@ -171,23 +172,40 @@ This is a security rule, not a preference.
 
 ### 6.2 Scope is checked from observable state
 
-CCL must check changed files from Git state, not from the agent report.
+CCL must check repository state from Git, not from the agent report.
 
-Expected approach:
+Observable repository state includes both tracked changes and untracked non-ignored files.
+
+Expected tracked-change basis:
 
 ```text
 git diff --name-status <base>...HEAD
 ```
 
-Then:
+Expected untracked-file basis:
+
+```text
+git ls-files --others --exclude-standard
+```
+
+A stricter implementation may use porcelain status as a unified source:
+
+```text
+git status --porcelain=v1 -z
+```
+
+Then CCL must:
 
 ```text
 canonicalize path
 reject path traversal
+include untracked non-ignored files in scope validation
 apply forbidden patterns first
 then require allowed pattern match
-verify operation type: create / edit / delete / rename
+verify operation type: create / edit / delete / rename / untracked
 ```
+
+Untracked files are not invisible. An agent must not be able to hide new files, temporary artifacts, generated code, or forbidden additions by leaving them outside the Git index.
 
 ### 6.3 Acceptance criteria must be executable
 
@@ -258,6 +276,21 @@ If an agent attempts to modify the frozen contract during execution, the result 
 
 ```text
 FAIL — task contract mutation attempted
+```
+
+### 7.2 CCL DNA mutation is governance
+
+`CCL_DNA.md` is not ordinary documentation.
+
+Any mutation of this document requires an explicit governance task and human architect approval. It must not be accepted as a side effect of a normal source PR, docs closeout, command-capture gate, or automated cleanup.
+
+The Admission Guard may verify a DNA change against policy, but automated verification alone must not be treated as sufficient authority to redefine the project DNA.
+
+Expected rule:
+
+```text
+CCL_DNA.md changed outside explicit governance gate -> FAIL
+CCL_DNA.md changed without human architect approval -> FAIL
 ```
 
 ---
@@ -378,6 +411,8 @@ Timeout is `FAIL`, not warning.
 FAIL — timeout_exceeded
 ```
 
+Partial stdout/stderr captured before timeout is diagnostic evidence only. It cannot prove `PASS`, even if the captured text contains a success-looking line.
+
 ### 9.3 Process tree cleanup
 
 CCL must aim to terminate the entire child process tree on timeout.
@@ -451,6 +486,8 @@ FAIL — output_limit_exceeded
 
 Hashes must describe the bytes actually saved to disk, not imagined full output that CCL did not persist.
 
+Partial stdout/stderr captured before output-limit termination is diagnostic evidence only. It cannot prove `PASS`, even if the saved slice contains success-looking text.
+
 Principle:
 
 ```text
@@ -470,6 +507,7 @@ It should contain:
 - repo identity;
 - base/head refs;
 - changed files;
+- untracked non-ignored files;
 - scope check result;
 - command evidence list;
 - ledger check result;
@@ -669,16 +707,23 @@ Examples:
 | Condition | Verdict |
 | --- | --- |
 | Forbidden file changed | FAIL |
+| Untracked non-ignored file outside allowed scope | FAIL |
 | Required validation missing | FAIL |
 | Required validation exit code non-zero | FAIL |
 | Required command timed out | FAIL |
+| Timeout with partial success-looking output | FAIL |
 | Command output limit exceeded | FAIL |
+| Output limit with partial success-looking output | FAIL |
 | Ledger required but missing | FAIL |
 | Unresolved ledger placeholder | FAIL |
+| CCL_DNA.md changed outside explicit governance gate | FAIL |
+| CCL_DNA.md changed without human architect approval | FAIL |
 | Admission Guard unavailable but explicitly expected in seed gate | PASS WITH WARNINGS |
 | All required evidence clean, no warnings | PASS |
 
 GitHub CI is metadata only, never final evidence.
+
+Partial evidence may explain failure. Partial evidence must not prove success.
 
 ---
 
@@ -706,6 +751,7 @@ Risks:
 
 - deletes or rewrites files;
 - commits temporary files;
+- leaves untracked files outside review;
 - changes ledger incorrectly;
 - pushes before validation.
 
@@ -713,6 +759,7 @@ Controls:
 
 - forbidden paths;
 - changed file checks;
+- untracked file checks;
 - ledger consistency;
 - retry limits.
 
@@ -726,6 +773,8 @@ Risks:
 - prompt injection through logs;
 - output flood / log spam;
 - stdout/stderr pipe deadlock exploitation;
+- untracked-file hiding;
+- DNA governance bypass;
 - ledger tampering.
 
 Controls required beyond MVP:
@@ -780,6 +829,8 @@ Prefer:
 - clear exit codes;
 - stable JSON artifacts;
 - path canonicalization;
+- tracked diff checks;
+- untracked file checks;
 - bounded execution;
 - streaming output capture;
 - rolling hashes;
@@ -795,6 +846,8 @@ Avoid:
 - full stdout/stderr buffering in memory;
 - sequential pipe reading that can deadlock;
 - unbounded output files;
+- ignoring untracked files;
+- modifying CCL DNA as incidental documentation;
 - broad globs;
 - hidden state;
 - silent warnings;
@@ -819,6 +872,8 @@ Future `ccl gate run` should use stable exit codes:
 
 Compatibility flags may be added later, but internal meaning should remain stable.
 
+Exit codes `50` and `51` are always failure-class exits. Partial captured logs may be used for diagnosis, but must not downgrade them to `PASS WITH WARNINGS` or `PASS`.
+
 ---
 
 ## 21. CCL Design Oaths
@@ -829,11 +884,14 @@ Compatibility flags may be added later, but internal meaning should remain stabl
 4. Logs are data, not instructions.
 5. LLM hints are hypotheses, not commands.
 6. Forbidden scope wins over allowed scope.
-7. A weak contract cannot produce a strong verdict.
-8. No bounded execution, no trusted capture.
-9. Capture must be streaming, bounded, hashed, and backpressure-safe.
-10. No ledger handling, no completed gate.
-11. Only evidence can admit.
+7. Untracked files are observable state.
+8. A weak contract cannot produce a strong verdict.
+9. No bounded execution, no trusted capture.
+10. Capture must be streaming, bounded, hashed, and backpressure-safe.
+11. Partial logs cannot prove PASS.
+12. CCL DNA mutation requires explicit governance.
+13. No ledger handling, no completed gate.
+14. Only evidence can admit.
 
 ---
 
