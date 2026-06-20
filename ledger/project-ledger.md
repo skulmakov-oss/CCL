@@ -9,7 +9,7 @@ Status: PASS WITH WARNINGS
 - Workstream: CCL Phase 1
 - Task type: validation runner
 - Branch: feat/contract-bound-validation-runner
-- PR: not created yet
+- PR: #7 — https://github.com/skulmakov-oss/CCL/pull/7
 - Base main HEAD: 84a81f970b581dd3e4e3fa3cf44c4e46596f9e12
 
 ### Basis
