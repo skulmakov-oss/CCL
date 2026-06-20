@@ -57,7 +57,7 @@ Deleted:
 - `cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version`: PASS
 - `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\ci\admission.ps1 --full`: PASS
 - `cargo run -p ccl-cli -- validate run --contract examples/ccl-validation-task-contract.json --repo .`: PASS
-- `cargo clippy --workspace --all-targets -- -D warnings`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
 - GitHub CI used as evidence: NO
 
 ### Validation Contract Used
