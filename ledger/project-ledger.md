@@ -1,5 +1,109 @@
 # CCL Project Ledger
 
+## 2026-06-20 — Evidence Manifest + Contract-bound Validation Runner
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Phase 1
+- Task type: validation runner
+- Branch: feat/contract-bound-validation-runner
+- PR: #7 — https://github.com/skulmakov-oss/CCL/pull/7
+- Base main HEAD: 84a81f970b581dd3e4e3fa3cf44c4e46596f9e12
+
+### Basis
+
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- examples/semantic-task-contract.json
+- examples/ccl-validation-task-contract.json
+- crates/ccl-core/src/task_contract.rs
+- crates/ccl-core/src/validation_runner.rs
+- crates/ccl-core/src/evidence.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+- ci/admission.ps1
+- ci/admission.sh
+- ci/rust_gate.sh
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/validation_runner.rs
+- examples/ccl-validation-task-contract.json
+
+Edited:
+- README.md
+- crates/ccl-cli/src/main.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/task_contract.rs
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version`: PASS
+- `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\ci\admission.ps1 --full`: PASS
+- `cargo run -p ccl-cli -- validate run --contract examples/ccl-validation-task-contract.json --repo .`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Validation Contract Used
+
+- `examples/ccl-validation-task-contract.json`
+
+### Aggregate Manifest
+
+- `.ccl/runs/validation-1781977468189-18536/validation-run-manifest.json`
+
+### Command Capture Result Paths
+
+- `.ccl/runs/1781977520287-2348/commands/001-cargo-version/result.json`
+- `.ccl/runs/1781977525432-27656/commands/001-local-admission-guard/result.json`
+- `.ccl/runs/1781977473001-18536/commands/001-local-admission-guard/result.json`
+
+### Validation Results
+
+- ccl capture command added: YES
+- contract validation commands parsed: YES
+- commands executed through ccl capture: YES
+- aggregate validation manifest written: YES
+- contract SHA-256 recorded: YES
+- Local Admission Guard runnable through validation contract: YES
+- GitHub CI used as evidence: NO
+- streaming stdout/stderr: YES
+- output byte limits enforced: YES
+- timeout stream drain bounded: YES
+- backpressure/deadlock test result: PASS
+
+### Warnings
+
+- Full CCL admission layer is still not implemented; this PR only adds contract-bound validation execution and aggregate evidence manifest.
+
+### Boundary Conclusion
+
+- semantic authority changed: NO
+- ledger discipline preserved: YES
+- evidence-manifest orchestration added: YES
+- admission verdict still future work: YES
+
+### Next Gate
+
+- recommended next gate: Scope/Diff Policy Check Seed
+- reason: validation orchestration now exists, but CCL still needs policy over what scope/diff is admissible before any verdict layer
+
 ## 2026-06-17 — Phase 1 CLI Core Seed
 
 Status: PASS WITH WARNINGS
@@ -55,7 +159,7 @@ Deleted:
 
 ### Warnings
 
-- CCL local Admission Guard is not implemented yet.
+- At the time of PR #2, checked-in Local Admission Guard and CCL capture were not implemented yet.
 - This gate seeds the deterministic CLI core only.
 
 ### Boundary Conclusion
@@ -82,8 +186,8 @@ Status: PASS WITH WARNINGS
 - Task type: capture seed
 - Branch: feat/command-evidence-capture-seed-codex
 - PR: #6 — https://github.com/skulmakov-oss/CCL/pull/6
-- Merge commit: not applicable
-- Final main HEAD after merge: not applicable
+- Merge commit: 84a81f970b581dd3e4e3fa3cf44c4e46596f9e12
+- Final main HEAD after merge: 84a81f970b581dd3e4e3fa3cf44c4e46596f9e12
 
 ### Basis
 

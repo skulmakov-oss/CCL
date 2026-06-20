@@ -63,6 +63,8 @@ Expected artifact layout:
   verdict.json
 ```
 
+Validation-run aggregation can extend this layout with a run-level manifest that references captured command artifacts.
+
 ## Phase 3 — Ledger Enforcement
 
 Goal: ensure task completion is linked to repository-resident project memory.

@@ -190,7 +190,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 
 ## Current Bootstrap Status
 
-The Phase 1 Rust CLI core seed is in place.
+The Phase 1 Rust CLI core seed and command evidence capture seed are in place.
 
 Current implemented direction:
 
@@ -199,16 +199,17 @@ Current implemented direction:
 - `ccl-cli`;
 - task contract loading/checking;
 - repository preflight command;
-- initial evidence/verdict model seeds;
-- project ledger discipline.
+- command evidence capture;
+- project ledger discipline;
+- contract-bound validation runner.
 
 Next implementation direction:
 
 ```text
-Command Evidence Capture Seed
+Scope/Diff Policy Check Seed
 ```
 
-That next gate should make CCL able to:
+Current capture layer already supports:
 
 - launch a command as argv, not shell by default;
 - stream stdout/stderr to disk;
@@ -250,7 +251,7 @@ cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeo
 Future admission runner:
 
 ```powershell
-ccl guard run --contract .ccl/contracts/task.json --repo .
+ccl validate run --contract examples/ccl-validation-task-contract.json --repo .
 ```
 
 ---

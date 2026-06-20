@@ -2,9 +2,10 @@ use ccl_core::capture::{capture_command, CaptureError};
 use ccl_core::evidence::{CapturePolicy, CaptureRequest, CommandSpec};
 use ccl_core::preflight;
 use ccl_core::task_contract::TaskContract;
+use ccl_core::validation_runner::{self, ValidationRunStatus};
 use ccl_core::verdict::VerdictStatus;
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
 #[command(name = "ccl")]
@@ -44,11 +45,26 @@ enum Commands {
         #[arg(value_name = "COMMAND", required = true, trailing_var_arg = true, num_args = 1..)]
         command: Vec<String>,
     },
+    /// Run contract-bound validation
+    Validate {
+        #[command(subcommand)]
+        action: ValidateCommands,
+    },
 }
 
 #[derive(Subcommand)]
 enum ContractCommands {
     Check { path: PathBuf },
+}
+
+#[derive(Subcommand)]
+enum ValidateCommands {
+    Run {
+        #[arg(long)]
+        contract: PathBuf,
+        #[arg(long)]
+        repo: PathBuf,
+    },
 }
 
 fn main() {
@@ -176,6 +192,25 @@ fn main() {
                 }
             }
         }
+        Some(Commands::Validate { action }) => match action {
+            ValidateCommands::Run { contract, repo } => {
+                match validation_runner::run_validation(contract, repo) {
+                    Ok(outcome) => {
+                        print_validation_run(
+                            &outcome.manifest,
+                            contract,
+                            repo,
+                            &outcome.manifest_path,
+                        );
+                        std::process::exit(validation_exit_code(&outcome.manifest.status));
+                    }
+                    Err(err) => {
+                        eprintln!("Validation runner error: {}", err);
+                        std::process::exit(40);
+                    }
+                }
+            }
+        },
         None => {}
     }
 }
@@ -186,5 +221,49 @@ fn report_capture_error(err: CaptureError) {
         CaptureError::Io(error) => eprintln!("Capture I/O error: {}", error),
         CaptureError::Json(error) => eprintln!("Capture JSON error: {}", error),
         CaptureError::SpawnFailed(message) => eprintln!("Capture spawn error: {}", message),
+    }
+}
+
+fn print_validation_run(
+    manifest: &validation_runner::ValidationRunManifest,
+    contract: &Path,
+    repo: &Path,
+    manifest_path: &str,
+) {
+    println!("CCL validation run");
+    println!("Contract: {}", contract.display());
+    println!("Repo: {}", repo.display());
+    println!("Status: {}", manifest.status);
+    if let Some(reason) = &manifest.reason {
+        println!("Reason: {}", reason);
+    }
+    println!();
+    println!("Commands:");
+    for command in &manifest.commands {
+        println!("- {}: {}", command.id, command.status);
+    }
+    if let Some(failed_required) = manifest.commands.iter().find(|command| {
+        command.required && command.status == ccl_core::evidence::CommandStatus::Fail
+    }) {
+        println!();
+        println!("Failed required command:");
+        println!("{}", failed_required.id);
+        println!();
+        println!("Evidence:");
+        println!("{}", failed_required.result_path);
+    }
+    println!();
+    println!("Manifest:");
+    println!("{}", manifest_path);
+    println!();
+    println!("GitHub CI used as evidence: NO");
+}
+
+fn validation_exit_code(status: &ValidationRunStatus) -> i32 {
+    match status {
+        ValidationRunStatus::Pass => 0,
+        ValidationRunStatus::PassWithWarnings => 10,
+        ValidationRunStatus::Fail => 20,
+        ValidationRunStatus::ContractFail => 30,
     }
 }

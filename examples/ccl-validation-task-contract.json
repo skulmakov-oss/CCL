@@ -1,0 +1,60 @@
+{
+  "project": "CCL",
+  "workstream": "Validation",
+  "task_type": "guard_gate",
+  "objective": "Run contract-bound validation through ccl capture and collect aggregate evidence.",
+  "required_context": {
+    "dna": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "crates/ccl-core/**",
+    "crates/ccl-cli/**",
+    "ci/**",
+    "docs/**",
+    "examples/**",
+    "ledger/**",
+    "README.md"
+  ],
+  "forbidden_paths": [
+    ".github/**"
+  ],
+  "required_validation": [
+    "cargo fmt",
+    "cargo test",
+    "local admission guard"
+  ],
+  "validation": {
+    "commands": [
+      {
+        "id": "cargo-fmt",
+        "program": "cargo",
+        "args": ["fmt", "--check"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-test",
+        "program": "cargo",
+        "args": ["test"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "local-admission-guard",
+        "program": "powershell.exe",
+        "args": ["-File", ".\\ci\\admission.ps1", "--full"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      }
+    ]
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "All required validation commands passed and aggregate evidence was produced.",
+    "pass_with_warnings": "Validation passed with non-blocking warnings.",
+    "fail": "Required validation failed or evidence was missing."
+  }
+}
