@@ -1,3 +1,5 @@
+use ccl_core::capture::{capture_command, CaptureError};
+use ccl_core::evidence::{CapturePolicy, CaptureRequest, CommandSpec};
 use ccl_core::preflight;
 use ccl_core::task_contract::TaskContract;
 use ccl_core::verdict::VerdictStatus;
@@ -24,6 +26,23 @@ enum Commands {
     Preflight {
         #[arg(long)]
         repo: PathBuf,
+    },
+    /// Capture command evidence
+    Capture {
+        #[arg(long)]
+        id: String,
+        #[arg(long)]
+        repo: PathBuf,
+        #[arg(long, default_value_t = 300)]
+        wall_timeout: u64,
+        #[arg(long, default_value_t = 10 * 1024 * 1024)]
+        max_stdout_bytes: u64,
+        #[arg(long, default_value_t = 10 * 1024 * 1024)]
+        max_stderr_bytes: u64,
+        #[arg(long, default_value_t = 20 * 1024 * 1024)]
+        max_combined_output_bytes: u64,
+        #[arg(value_name = "COMMAND", required = true, trailing_var_arg = true, num_args = 1..)]
+        command: Vec<String>,
     },
 }
 
@@ -108,6 +127,64 @@ fn main() {
                 std::process::exit(1);
             }
         }
+        Some(Commands::Capture {
+            id,
+            repo,
+            wall_timeout,
+            max_stdout_bytes,
+            max_stderr_bytes,
+            max_combined_output_bytes,
+            command,
+        }) => {
+            let policy = CapturePolicy {
+                wall_timeout_seconds: *wall_timeout,
+                max_stdout_bytes: *max_stdout_bytes,
+                max_stderr_bytes: *max_stderr_bytes,
+                max_combined_output_bytes: *max_combined_output_bytes,
+                ..CapturePolicy::default()
+            };
+
+            if command.is_empty() {
+                eprintln!("Capture requires a command after --");
+                std::process::exit(1);
+            }
+
+            let capture_request = CaptureRequest {
+                id: id.clone(),
+                repo: repo.clone(),
+                command: CommandSpec {
+                    program: command[0].clone(),
+                    args: command[1..].to_vec(),
+                },
+                policy,
+            };
+
+            match capture_command(capture_request) {
+                Ok(outcome) => {
+                    println!("Capture run: {}", outcome.run.run_id);
+                    println!("Command: {}", outcome.command_result.program);
+                    println!("Status: {}", outcome.command_result.status);
+                    println!("Result: {}", outcome.command_result.result_path);
+                    println!("Evidence manifest: {}", outcome.run.evidence_manifest_path);
+                    if outcome.command_result.status == ccl_core::evidence::CommandStatus::Fail {
+                        std::process::exit(1);
+                    }
+                }
+                Err(err) => {
+                    report_capture_error(err);
+                    std::process::exit(1);
+                }
+            }
+        }
         None => {}
+    }
+}
+
+fn report_capture_error(err: CaptureError) {
+    match err {
+        CaptureError::InvalidCommand(message) => eprintln!("Capture command error: {}", message),
+        CaptureError::Io(error) => eprintln!("Capture I/O error: {}", error),
+        CaptureError::Json(error) => eprintln!("Capture JSON error: {}", error),
+        CaptureError::SpawnFailed(message) => eprintln!("Capture spawn error: {}", message),
     }
 }
