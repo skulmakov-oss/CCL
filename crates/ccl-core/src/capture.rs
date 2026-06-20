@@ -105,6 +105,16 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
     let result_path = command_dir.join("result.json");
     let run_json_path = run_dir.join("run.json");
     let manifest_path = run_dir.join("evidence-manifest.json");
+    let artifact_paths = ArtifactPaths {
+        run_dir: run_dir.clone(),
+        command_path: command_path.clone(),
+        env_path: env_path.clone(),
+        stdout_path: stdout_path.clone(),
+        stderr_path: stderr_path.clone(),
+        result_path: result_path.clone(),
+        run_json_path: run_json_path.clone(),
+        manifest_path: manifest_path.clone(),
+    };
 
     let command_json = CommandArtifact {
         id: request.id.clone(),
@@ -143,18 +153,47 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
     child.stderr(Stdio::piped());
 
     let start_instant = Instant::now();
-    let mut spawned = child
-        .spawn()
-        .map_err(|e| CaptureError::SpawnFailed(e.to_string()))?;
+    let mut spawned = match child.spawn() {
+        Ok(child) => child,
+        Err(error) => {
+            let spawn_message = error.to_string();
+            return persist_spawn_failure(
+                &run_id,
+                &artifact_paths,
+                &request,
+                created_unix_ms,
+                env_sha256,
+                &spawn_message,
+            );
+        }
+    };
 
-    let stdout = spawned
-        .stdout
-        .take()
-        .ok_or_else(|| CaptureError::SpawnFailed("stdout pipe unavailable".to_string()))?;
-    let stderr = spawned
-        .stderr
-        .take()
-        .ok_or_else(|| CaptureError::SpawnFailed("stderr pipe unavailable".to_string()))?;
+    let stdout = match spawned.stdout.take() {
+        Some(stdout) => stdout,
+        None => {
+            return persist_spawn_failure(
+                &run_id,
+                &artifact_paths,
+                &request,
+                created_unix_ms,
+                env_sha256,
+                "stdout pipe unavailable",
+            );
+        }
+    };
+    let stderr = match spawned.stderr.take() {
+        Some(stderr) => stderr,
+        None => {
+            return persist_spawn_failure(
+                &run_id,
+                &artifact_paths,
+                &request,
+                created_unix_ms,
+                env_sha256,
+                "stderr pipe unavailable",
+            );
+        }
+    };
 
     let shared = Arc::new(Mutex::new(SharedCaptureState::new()));
     let output_limit_hit = Arc::new(AtomicBool::new(false));
@@ -188,6 +227,7 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
     let mut timed_out = false;
     let mut child_exit_status = None;
     let mut stream_drain_failed = false;
+    let mut termination_requested = false;
 
     loop {
         if let Some(status) = spawned.try_wait()? {
@@ -196,12 +236,15 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
         }
 
         if output_limit_hit.load(Ordering::SeqCst) {
+            let _ = spawned.kill();
+            termination_requested = true;
             break;
         }
 
         if start_instant.elapsed() >= wall_timeout {
             timed_out = true;
             let _ = spawned.kill();
+            termination_requested = true;
             break;
         }
 
@@ -221,6 +264,9 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
                     stream_drain_failed = true;
                 }
                 break;
+            }
+            if termination_requested && output_limit_hit.load(Ordering::SeqCst) {
+                let _ = spawned.kill();
             }
             thread::sleep(Duration::from_millis(25));
         }
@@ -609,6 +655,127 @@ fn write_json_file<P: AsRef<Path>, T: Serialize>(path: P, value: &T) -> Result<(
     Ok(())
 }
 
+#[derive(Debug, Clone)]
+struct ArtifactPaths {
+    run_dir: PathBuf,
+    command_path: PathBuf,
+    env_path: PathBuf,
+    stdout_path: PathBuf,
+    stderr_path: PathBuf,
+    result_path: PathBuf,
+    run_json_path: PathBuf,
+    manifest_path: PathBuf,
+}
+
+fn persist_spawn_failure(
+    run_id: &str,
+    paths: &ArtifactPaths,
+    request: &CaptureRequest,
+    created_unix_ms: u128,
+    env_sha256: String,
+    message: &str,
+) -> Result<CaptureOutcome, CaptureError> {
+    fs::write(&paths.stdout_path, b"")?;
+    fs::write(&paths.stderr_path, message.as_bytes())?;
+
+    let stdout_sha256 = sha256_hex(b"");
+    let stderr_sha256 = sha256_hex(message.as_bytes());
+    let stderr_bytes = message.len() as u64;
+
+    let command_result = CommandCaptureResult {
+        id: request.id.clone(),
+        program: request.command.program.clone(),
+        args: request.command.args.clone(),
+        cwd: request
+            .repo
+            .canonicalize()
+            .unwrap_or_else(|_| request.repo.clone())
+            .to_string_lossy()
+            .into_owned(),
+        status: CommandStatus::Fail,
+        failure_class: Some(FailureClass::SpawnFailed),
+        exit_code: None,
+        timed_out: false,
+        output_limit_exceeded: false,
+        runtime_ms: 0,
+        wall_timeout_seconds: request.policy.wall_timeout_seconds,
+        stdout: StreamCaptureResult {
+            path: paths.stdout_path.to_string_lossy().into_owned(),
+            sha256: stdout_sha256.clone(),
+            bytes: 0,
+            complete: true,
+            truncated: false,
+            hash_scope: HashScope::SavedBytesOnly,
+        },
+        stderr: StreamCaptureResult {
+            path: paths.stderr_path.to_string_lossy().into_owned(),
+            sha256: stderr_sha256.clone(),
+            bytes: stderr_bytes,
+            complete: true,
+            truncated: false,
+            hash_scope: HashScope::SavedBytesOnly,
+        },
+        combined_output_bytes: stderr_bytes,
+        max_stdout_bytes: request.policy.max_stdout_bytes,
+        max_stderr_bytes: request.policy.max_stderr_bytes,
+        max_combined_output_bytes: request.policy.max_combined_output_bytes,
+        env_path: paths.env_path.to_string_lossy().into_owned(),
+        env_sha256,
+        result_path: paths.result_path.to_string_lossy().into_owned(),
+        command_path: paths.command_path.to_string_lossy().into_owned(),
+    };
+
+    write_json_file(&paths.result_path, &command_result)?;
+
+    let manifest = EvidenceManifest {
+        run_id: run_id.to_string(),
+        repo_path: request
+            .repo
+            .canonicalize()
+            .unwrap_or_else(|_| request.repo.clone())
+            .to_string_lossy()
+            .into_owned(),
+        created_unix_ms,
+        aggregate_status: CommandStatus::Fail,
+        commands: vec![CommandEvidenceEntry {
+            id: command_result.id.clone(),
+            program: command_result.program.clone(),
+            args: command_result.args.clone(),
+            cwd: command_result.cwd.clone(),
+            status: command_result.status.clone(),
+            failure_class: command_result.failure_class.clone(),
+            exit_code: command_result.exit_code,
+            timed_out: command_result.timed_out,
+            output_limit_exceeded: command_result.output_limit_exceeded,
+            runtime_ms: command_result.runtime_ms,
+            result_path: command_result.result_path.clone(),
+            command_path: command_result.command_path.clone(),
+            stdout_path: command_result.stdout.path.clone(),
+            stderr_path: command_result.stderr.path.clone(),
+            env_path: command_result.env_path.clone(),
+            env_sha256: command_result.env_sha256.clone(),
+        }],
+    };
+    write_json_file(&paths.manifest_path, &manifest)?;
+
+    let run_record = RunRecord {
+        run_id: manifest.run_id.clone(),
+        repo_path: manifest.repo_path.clone(),
+        created_unix_ms,
+        command_ids: vec![request.id.clone()],
+        run_path: paths.run_dir.to_string_lossy().into_owned(),
+        run_json_path: paths.run_json_path.to_string_lossy().into_owned(),
+        evidence_manifest_path: paths.manifest_path.to_string_lossy().into_owned(),
+    };
+    write_json_file(&paths.run_json_path, &run_record)?;
+
+    Ok(CaptureOutcome {
+        run: run_record,
+        manifest,
+        command_result,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -691,6 +858,26 @@ fn main() {
                 stderr.flush().unwrap();
             }
         }
+        "limit_forever" => {
+            let out = vec![b'O'; 4096];
+            let err = vec![b'E'; 4096];
+            let t1 = thread::spawn(move || {
+                let mut stdout = io::stdout().lock();
+                loop {
+                    stdout.write_all(&out).unwrap();
+                    stdout.flush().unwrap();
+                }
+            });
+            let t2 = thread::spawn(move || {
+                let mut stderr = io::stderr().lock();
+                loop {
+                    stderr.write_all(&err).unwrap();
+                    stderr.flush().unwrap();
+                }
+            });
+            t1.join().unwrap();
+            t2.join().unwrap();
+        }
         _ => {
             println!("default");
         }
@@ -766,13 +953,13 @@ fn main() {
     fn output_limit_is_recorded_and_truncated() {
         let repo = repo_dir();
         let policy = CapturePolicy {
-            max_stdout_bytes: 64 * 1024,
-            max_stderr_bytes: 64 * 1024,
-            max_combined_output_bytes: 96 * 1024,
+            max_stdout_bytes: 32 * 1024,
+            max_stderr_bytes: 32 * 1024,
+            max_combined_output_bytes: 48 * 1024,
             ..CapturePolicy::default()
         };
 
-        let outcome = capture(&repo, "limit", &["limit"], policy);
+        let outcome = capture(&repo, "limit", &["limit_forever"], policy);
 
         assert_eq!(outcome.command_result.status, CommandStatus::Fail);
         assert_eq!(
@@ -780,6 +967,8 @@ fn main() {
             Some(FailureClass::OutputLimitExceeded)
         );
         assert!(outcome.command_result.output_limit_exceeded);
+        assert!(!outcome.command_result.timed_out);
+        assert!(outcome.command_result.runtime_ms < 10_000);
         assert!(outcome.command_result.stdout.truncated || outcome.command_result.stderr.truncated);
         assert_eq!(
             file_sha256(Path::new(&outcome.command_result.stdout.path)).unwrap(),
@@ -789,6 +978,32 @@ fn main() {
             file_sha256(Path::new(&outcome.command_result.stderr.path)).unwrap(),
             outcome.command_result.stderr.sha256
         );
+    }
+
+    #[test]
+    fn spawn_failure_persists_artifacts() {
+        let repo = repo_dir();
+        let outcome = capture_command(CaptureRequest {
+            id: "spawn-failure".to_string(),
+            repo: repo.clone(),
+            command: CommandSpec {
+                program: "definitely-not-a-real-binary-12345".to_string(),
+                args: vec![],
+            },
+            policy: CapturePolicy::default(),
+        })
+        .unwrap();
+
+        assert_eq!(outcome.command_result.status, CommandStatus::Fail);
+        assert_eq!(
+            outcome.command_result.failure_class,
+            Some(FailureClass::SpawnFailed)
+        );
+        assert_eq!(outcome.command_result.exit_code, None);
+        assert!(Path::new(&outcome.command_result.result_path).exists());
+        assert!(Path::new(&outcome.run.evidence_manifest_path).exists());
+        assert!(Path::new(&outcome.run.run_json_path).exists());
+        assert!(Path::new(&outcome.command_result.stderr.path).exists());
     }
 
     #[test]
