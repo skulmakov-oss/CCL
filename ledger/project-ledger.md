@@ -103,8 +103,15 @@ Status: PASS WITH WARNINGS
 
 Created:
 - crates/ccl-core/src/capture.rs
+- ci/admission.ps1
+- ci/admission.sh
+- ci/common.sh
+- ci/env_check.sh
+- ci/rust_gate.sh
+- ci/semantic_gate.sh
 
 Edited:
+- .gitignore
 - Cargo.lock
 - crates/ccl-cli/src/main.rs
 - crates/ccl-core/Cargo.toml
@@ -125,6 +132,7 @@ Deleted:
 - `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
 - `cargo run -p ccl-cli -- preflight --repo .`: PASS
 - `cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version`: PASS
+- `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\ci\admission.ps1 --full`: PASS
 - `cargo clippy --all-targets --all-features -- -D warnings`: PASS
 - GitHub CI used as evidence: NO
 
@@ -132,6 +140,9 @@ Deleted:
 
 - cargo-version capture: PASS
 - artifact path: `C:\Users\said3\Desktop\CCL\.ccl\runs\1781963867501-18332\commands\001-cargo-version\result.json`
+- Local Admission Guard capture: PASS
+- exact command: `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\ci\admission.ps1 --full`
+- artifact path: `C:\Users\said3\Desktop\CCL\.ccl\runs\1781964869831-19912\commands\001-local-admission-guard\result.json`
 - capture artifact shape:
   - `.ccl/runs/<run-id>/run.json`
   - `.ccl/runs/<run-id>/evidence-manifest.json`
@@ -140,9 +151,8 @@ Deleted:
   - `.ccl/runs/<run-id>/commands/001-<command-id>/stdout.txt`
   - `.ccl/runs/<run-id>/commands/001-<command-id>/stderr.txt`
   - `.ccl/runs/<run-id>/commands/001-<command-id>/result.json`
-- Local Admission Guard command: not determinable from repository state
-- Local Admission Guard executed through CCL capture: NO
-- Local Admission Guard capture result: NOT RUN, because the exact repository command could not be identified from the checked-in files
+- Local Admission Guard executed through CCL capture: YES
+- Local Admission Guard capture result: PASS
 - streaming stdout/stderr: YES
 - output byte limits enforced: YES
 - timeout stream drain bounded: YES
@@ -150,7 +160,6 @@ Deleted:
 
 ### Warnings
 
-- Existing Local Admission Guard is available in project doctrine, but the exact repository command was not present in checked-in files, so a production-like Local Admission Guard capture could not be run without inventing the command.
 - The full CCL admission layer is not implemented yet.
 - GitHub CI was not used as evidence.
 
