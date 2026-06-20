@@ -80,8 +80,8 @@ Status: PASS WITH WARNINGS
 
 - Workstream: CCL Phase 1
 - Task type: capture seed
-- Branch: feat/command-evidence-capture-seed
-- PR: not created
+- Branch: feat/command-evidence-capture-seed-codex
+- PR: #6 — https://github.com/skulmakov-oss/CCL/pull/6
 - Merge commit: not applicable
 - Final main HEAD after merge: not applicable
 
@@ -139,10 +139,10 @@ Deleted:
 ### Capture Proof
 
 - cargo-version capture: PASS
-- artifact path: `C:\Users\said3\Desktop\CCL\.ccl\runs\1781963867501-18332\commands\001-cargo-version\result.json`
+- artifact path: `.ccl/runs/1781963867501-18332/commands/001-cargo-version/result.json`
 - Local Admission Guard capture: PASS
 - exact command: `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\ci\admission.ps1 --full`
-- artifact path: `C:\Users\said3\Desktop\CCL\.ccl\runs\1781964869831-19912\commands\001-local-admission-guard\result.json`
+- artifact path: `.ccl/runs/1781964869831-19912/commands/001-local-admission-guard/result.json`
 - capture artifact shape:
   - `.ccl/runs/<run-id>/run.json`
   - `.ccl/runs/<run-id>/evidence-manifest.json`
