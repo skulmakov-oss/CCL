@@ -31,10 +31,38 @@ pub struct TaskContract {
     #[serde(default)]
     pub forbidden_paths: Vec<String>,
     pub required_validation: Vec<String>,
+    #[serde(default)]
+    pub validation: ValidationPlan,
     pub github_ci_as_evidence: bool,
     pub ledger_update_required: bool,
     #[serde(default)]
     pub verdicts: HashMap<String, String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ValidationPlan {
+    #[serde(default)]
+    pub commands: Vec<ValidationCommand>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ValidationCommand {
+    pub id: String,
+    pub program: String,
+    #[serde(default)]
+    pub args: Vec<String>,
+    #[serde(default = "default_required")]
+    pub required: bool,
+    #[serde(default = "default_validation_wall_timeout_seconds")]
+    pub wall_timeout_seconds: u64,
+}
+
+fn default_required() -> bool {
+    true
+}
+
+fn default_validation_wall_timeout_seconds() -> u64 {
+    300
 }
 
 #[derive(Debug, Clone)]

@@ -250,7 +250,7 @@ cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeo
 Future admission runner:
 
 ```powershell
-ccl guard run --contract .ccl/contracts/task.json --repo .
+ccl validate run --contract examples/ccl-validation-task-contract.json --repo .
 ```
 
 ---
