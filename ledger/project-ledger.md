@@ -159,7 +159,7 @@ Deleted:
 
 ### Warnings
 
-- CCL local Admission Guard is not implemented yet.
+- At the time of PR #2, checked-in Local Admission Guard and CCL capture were not implemented yet.
 - This gate seeds the deterministic CLI core only.
 
 ### Boundary Conclusion
@@ -186,8 +186,8 @@ Status: PASS WITH WARNINGS
 - Task type: capture seed
 - Branch: feat/command-evidence-capture-seed-codex
 - PR: #6 — https://github.com/skulmakov-oss/CCL/pull/6
-- Merge commit: not applicable
-- Final main HEAD after merge: not applicable
+- Merge commit: 84a81f970b581dd3e4e3fa3cf44c4e46596f9e12
+- Final main HEAD after merge: 84a81f970b581dd3e4e3fa3cf44c4e46596f9e12
 
 ### Basis
 
