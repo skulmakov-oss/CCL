@@ -76,7 +76,7 @@ Deleted:
 - contract path: examples/ccl-admission-task-contract.json
 - command: cargo run -p ccl-cli -- ledger verify --contract examples/ccl-admission-task-contract.json --repo .
 - status: PASS
-- ledger verification manifest path: .ccl/runs/ledger-1782047280593-9944/ledger-verification-manifest.json
+- ledger verification manifest path: .ccl/runs/ledger-1782047393414-23288/ledger-verification-manifest.json
 - matched entry: ## 2026-06-21 — Admission Verdict From Evidence Seed
 - required checks: PASS
 - violations count: 0
@@ -86,7 +86,7 @@ Deleted:
 
 - command: cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
 - status: PASS
-- gate manifest path: .ccl/runs/gate-1782047280838-12932/gate-run-manifest.json
+- gate manifest path: .ccl/runs/gate-1782047394263-21812/gate-run-manifest.json
 - admission status: PASS
 
 ### Boundary Conclusion
