@@ -217,11 +217,12 @@ Current implemented direction:
 - ledger semantic verification.
 - external review intake / threat model notes.
 - demo script.
+- environment allowlist policy evaluation.
 
 Next implementation direction:
 
 ```text
-Environment Allowlist Policy Design Seed
+Gate Run UX Summary Seed
 ```
 
 Current capture layer already supports:

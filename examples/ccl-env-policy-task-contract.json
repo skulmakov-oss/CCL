@@ -1,0 +1,76 @@
+{
+  "project": "CCL",
+  "workstream": "Environment Policy",
+  "task_type": "guard_gate",
+  "objective": "Evaluate environment policy in warn mode while capturing a minimal command.",
+  "required_context": {
+    "dna": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "README.md",
+    "crates/ccl-core/**",
+    "crates/ccl-cli/**",
+    "docs/**",
+    "examples/**",
+    "ledger/**"
+  ],
+  "forbidden_paths": [
+    ".github/**"
+  ],
+  "required_validation": [
+    "cargo version",
+    "environment policy evaluation"
+  ],
+  "validation": {
+    "commands": [
+      {
+        "id": "cargo-version",
+        "program": "cargo",
+        "args": [
+          "--version"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      }
+    ]
+  },
+  "environment_policy": {
+    "mode": "warn",
+    "allow": [
+      "PATH",
+      "SystemRoot",
+      "WINDIR",
+      "HOME",
+      "USERPROFILE",
+      "TMP",
+      "TEMP",
+      "NO_COLOR",
+      "TERM"
+    ],
+    "deny": [
+      "CCL_TEST_DENY_"
+    ],
+    "allow_prefixes": [
+      "CARGO_TERM_"
+    ],
+    "deny_prefixes": [
+      "CCL_TEST_DENY_"
+    ],
+    "redact_patterns": [
+      "TOKEN",
+      "SECRET",
+      "PASSWORD",
+      "KEY"
+    ],
+    "unknown": "warn"
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "Environment policy was evaluated in warn mode and the command stayed admissible.",
+    "pass_with_warnings": "Environment policy recorded warnings without blocking the run.",
+    "fail": "Environment policy or validation failed."
+  }
+}

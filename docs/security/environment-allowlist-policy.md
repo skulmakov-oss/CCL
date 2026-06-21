@@ -7,6 +7,7 @@ This document is a design seed for future environment variable policy in CCL com
 It does not implement enforcement.
 
 Current CCL capture records environment snapshots.
+This seed adds policy evaluation over those snapshots without mutating the environment.
 Future capture should support policy-bound environment allowlists.
 Admission must eventually reject evidence produced under forbidden environment context.
 
@@ -16,6 +17,22 @@ This is a design-only specification.
 
 It defines future policy behavior, manifest shape, and admission semantics.
 It does not change runtime behavior in the current PR.
+
+## Implementation Status
+
+Implemented in this seed:
+
+- policy parsing;
+- environment variable classification and evaluation;
+- result summary fields for capture and validation manifests;
+- warn, enforce, and strict mode foundations.
+
+Not implemented:
+
+- environment mutation or cleaning;
+- full raw env redaction;
+- sandboxing;
+- signed manifests.
 
 ## Problem Statement
 

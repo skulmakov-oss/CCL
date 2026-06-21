@@ -245,6 +245,7 @@ fn main() {
                     args: command[1..].to_vec(),
                 },
                 policy,
+                environment_policy: None,
             };
 
             match capture_command(capture_request) {
@@ -410,6 +411,17 @@ fn print_validation_run(
         println!();
         println!("Evidence:");
         println!("{}", failed_required.result_path);
+    }
+    if manifest.environment_policy.checked {
+        println!();
+        println!("Environment policy:");
+        println!("- mode: {}", manifest.environment_policy.mode);
+        println!("- status: {}", manifest.environment_policy.status);
+        println!("- warnings: {}", manifest.environment_policy.warnings_count);
+        println!(
+            "- violations: {}",
+            manifest.environment_policy.violations_count
+        );
     }
     println!();
     println!("Manifest:");
