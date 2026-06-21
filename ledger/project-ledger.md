@@ -1,5 +1,108 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Public CI Metadata Compatibility Fix
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Public Project Hygiene
+- Task type: guard_gate
+- Task class: CI compatibility fix
+- Branch: ci/fix-public-ci-metadata-compatibility
+- PR: #25
+- Base main HEAD: 322bea010122390442a911d8c2240e7379b3dd26
+
+### Objective
+
+- Objective: Keep public GitHub Actions workflow green with Linux-compatible metadata checks while preserving local CCL admission authority.
+
+### Problem
+
+- GitHub Actions public CI was red after Public CI Metadata Seed.
+- Failing areas:
+  - Rust checks / cargo test
+  - Contract checks / gate smoke check
+  - Demo checks / bash demo
+- GitHub CI remains metadata, not CCL admission evidence.
+
+### Changed Files
+
+Created:
+- examples/ccl-ci-metadata-task-contract.json
+
+Edited:
+- .github/workflows/ci.yml
+- docs/ci-metadata.md
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- crates/ccl-core/src/environment.rs
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### CI Compatibility Proof
+
+- CI logs inspected: YES
+- root cause identified: YES
+- GitHub Actions workflow fixed: YES
+- Linux-compatible CI path added: YES
+- Gate shape: guard_gate
+- local admission authority preserved: YES
+- GitHub CI treated as admission evidence: NO
+- local CCL gate remains authority: YES
+- public CI expected to turn green: YES
+
+### Gate Proof
+
+- command: cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .
+- status: PASS
+- gate manifest path: .ccl/runs/gate-.../gate-run-manifest.json
+
+### Boundary Conclusion
+
+- runtime behavior changed: NO
+- CCL admission authority changed: NO
+- GitHub CI remains metadata: YES
+- local evidence remains admission basis: YES
+
+### Warnings
+
+- This PR fixes public CI metadata only.
+- GitHub CI is still not CCL evidence.
+- The CI smoke contract is not a replacement for local task-specific admission contracts.
+
+### Next Gate
+
+- recommended next gate: Release Artifact Design Seed
+- reason: after public CI is visibly green, release artifact design can continue without carrying red metadata noise.
+
 ## 2026-06-22 — Codex Test-Fix Contract Trial Seed
 
 Status: PASS WITH WARNINGS

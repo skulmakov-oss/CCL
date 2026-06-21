@@ -1,0 +1,92 @@
+{
+  "project": "CCL",
+  "workstream": "CCL Public Project Hygiene",
+  "task_type": "guard_gate",
+  "objective": "Keep the public GitHub Actions workflow green with Linux-compatible metadata checks while preserving local CCL admission authority.",
+  "required_context": {
+    "dna": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "README.md",
+    "crates/**",
+    "docs/**",
+    "examples/**",
+    "ledger/**",
+    "scripts/**",
+    "ci/**",
+    ".github/workflows/ci.yml",
+    "Cargo.toml",
+    "Cargo.lock",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "NOTICE"
+  ],
+  "forbidden_paths": [
+    ".github/actions/**"
+  ],
+  "required_validation": [
+    "cargo fmt",
+    "cargo test",
+    "cargo version",
+    "cargo clippy"
+  ],
+  "validation": {
+    "commands": [
+      {
+        "id": "cargo-fmt",
+        "program": "cargo",
+        "args": [
+          "fmt",
+          "--check"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-test",
+        "program": "cargo",
+        "args": [
+          "test"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-version",
+        "program": "cargo",
+        "args": [
+          "--version"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-clippy",
+        "program": "cargo",
+        "args": [
+          "clippy",
+          "--all-targets",
+          "--all-features",
+          "--",
+          "-D",
+          "warnings"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      }
+    ]
+  },
+  "scope_limits": {
+    "max_changed_files": 25,
+    "max_diff_lines": 3000
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "Public CI metadata checks stayed green with Linux-compatible commands.",
+    "pass_with_warnings": "Public CI metadata passed with non-blocking warnings.",
+    "fail": "Public CI metadata or validation failed."
+  }
+}
