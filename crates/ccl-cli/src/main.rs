@@ -2,6 +2,7 @@ use ccl_core::admission;
 use ccl_core::capture::{capture_command, CaptureError};
 use ccl_core::evidence::{CapturePolicy, CaptureRequest, CommandSpec};
 use ccl_core::gate::{self, GateRunRequest};
+use ccl_core::ledger as ledger_core;
 use ccl_core::preflight;
 use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
@@ -63,6 +64,11 @@ enum Commands {
         #[command(subcommand)]
         action: AdmissionCommands,
     },
+    /// Verify ledger semantics from existing evidence
+    Ledger {
+        #[command(subcommand)]
+        action: LedgerCommands,
+    },
     /// Run the full gate orchestration
     Gate {
         #[command(subcommand)]
@@ -106,6 +112,18 @@ enum AdmissionCommands {
         validation_manifest: PathBuf,
         #[arg(long)]
         scope_manifest: PathBuf,
+        #[arg(long, default_value = "ledger/project-ledger.md")]
+        ledger: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum LedgerCommands {
+    Verify {
+        #[arg(long)]
+        contract: PathBuf,
+        #[arg(long)]
+        repo: PathBuf,
         #[arg(long, default_value = "ledger/project-ledger.md")]
         ledger: PathBuf,
     },
@@ -306,6 +324,34 @@ fn main() {
                     std::process::exit(40);
                 }
             },
+        },
+        Some(Commands::Ledger { action }) => match action {
+            LedgerCommands::Verify {
+                contract,
+                repo,
+                ledger,
+            } => {
+                match ledger_core::run_ledger_verification(ledger_core::LedgerVerificationRequest {
+                    contract_path: contract.clone(),
+                    repo: repo.clone(),
+                    ledger_path: ledger.clone(),
+                }) {
+                    Ok(outcome) => {
+                        print_ledger_verification(
+                            &outcome.manifest,
+                            contract,
+                            repo,
+                            ledger,
+                            &outcome.manifest_path,
+                        );
+                        std::process::exit(ledger_exit_code(&outcome.manifest.status));
+                    }
+                    Err(err) => {
+                        eprintln!("Ledger verification error: {}", err);
+                        std::process::exit(40);
+                    }
+                }
+            }
         },
         Some(Commands::Gate { action }) => match action {
             GateCommands::Run { contract, repo } => {
@@ -515,6 +561,54 @@ fn print_gate_run(
     println!("GitHub CI used as evidence: NO");
 }
 
+fn print_ledger_verification(
+    manifest: &ledger_core::LedgerVerificationManifest,
+    contract: &Path,
+    repo: &Path,
+    ledger_path: &Path,
+    manifest_path: &str,
+) {
+    println!("CCL ledger verify");
+    println!("Contract: {}", contract.display());
+    println!("Repo: {}", repo.display());
+    println!("Ledger: {}", ledger_path.display());
+    println!("Status: {}", manifest.status);
+    if let Some(reason) = &manifest.reason {
+        println!("Reason: {}", reason);
+    }
+    if let Some(entry) = &manifest.matched_entry {
+        println!();
+        println!("Matched entry:");
+        println!("{}", entry.heading);
+    }
+    if !manifest.checks.is_empty() {
+        println!();
+        println!("Checks:");
+        for check in &manifest.checks {
+            println!("- {}: {}", check.kind, check.status);
+        }
+    }
+    if !manifest.warnings.is_empty() {
+        println!();
+        println!("Warnings:");
+        for warning in &manifest.warnings {
+            println!("- {}: {}", warning.kind, warning.reason);
+        }
+    }
+    if !manifest.violations.is_empty() {
+        println!();
+        println!("Violations:");
+        for violation in &manifest.violations {
+            println!("- {}: {}", violation.kind, violation.reason);
+        }
+    }
+    println!();
+    println!("Manifest:");
+    println!("{}", manifest_path);
+    println!();
+    println!("GitHub CI used as evidence: NO");
+}
+
 fn admission_exit_code(status: &AdmissionStatus) -> i32 {
     match status {
         AdmissionStatus::Pass => 0,
@@ -522,5 +616,14 @@ fn admission_exit_code(status: &AdmissionStatus) -> i32 {
         AdmissionStatus::Fail => 20,
         AdmissionStatus::ContractFail => 30,
         AdmissionStatus::InternalError => 40,
+    }
+}
+
+fn ledger_exit_code(status: &ledger_core::LedgerVerificationStatus) -> i32 {
+    match status {
+        ledger_core::LedgerVerificationStatus::Pass => 0,
+        ledger_core::LedgerVerificationStatus::PassWithWarnings => 10,
+        ledger_core::LedgerVerificationStatus::Fail => 20,
+        ledger_core::LedgerVerificationStatus::ContractFail => 30,
     }
 }

@@ -208,11 +208,12 @@ Current implemented direction:
 - scope/diff policy check.
 - admission verdict from evidence.
 - gate orchestration.
+- ledger semantic verification.
 
 Next implementation direction:
 
 ```text
-Ledger Semantic Verification Seed
+External Review Intake / Threat Model Notes Seed
 ```
 
 Current capture layer already supports:
@@ -264,6 +265,12 @@ Gate orchestration:
 
 ```powershell
 cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
+```
+
+Ledger verification:
+
+```powershell
+cargo run -p ccl-cli -- ledger verify --contract examples/ccl-admission-task-contract.json --repo .
 ```
 
 Admission verdict from existing evidence:

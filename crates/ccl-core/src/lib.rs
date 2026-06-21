@@ -2,6 +2,7 @@ pub mod admission;
 pub mod capture;
 pub mod evidence;
 pub mod gate;
+pub mod ledger;
 pub mod preflight;
 pub mod scope;
 pub mod task_contract;
