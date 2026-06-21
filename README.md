@@ -191,6 +191,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.md) — guide to realistic AI-agent task contract examples.
 - [`docs/ci-metadata.md`](docs/ci-metadata.md) — explains why GitHub CI is metadata, not CCL admission evidence.
 - [`docs/install.md`](docs/install.md) — source install, build, verification, and release-readiness notes.
+- [`docs/release-artifacts.md`](docs/release-artifacts.md) — future release artifact, checksum, manifest, and evidence design.
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — public CI metadata workflow.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
 - [`scripts/demo.ps1`](scripts/demo.ps1) — repeatable PowerShell demo script.
@@ -271,6 +272,14 @@ cargo run -p ccl-cli -- --version
 ```
 
 See [`docs/install.md`](docs/install.md).
+
+## Release Artifact Design
+
+CCL does not yet publish official release artifacts.
+
+The future release model is documented in [`docs/release-artifacts.md`](docs/release-artifacts.md).
+
+Release artifacts will require local CCL evidence. GitHub CI remains public metadata, not admission evidence.
 
 Current capture layer already supports:
 
