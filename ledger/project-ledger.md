@@ -27,7 +27,7 @@ Status: PASS WITH WARNINGS
 ### Changed Files
 
 Created:
-- none, unless a small formatting helper module is justified
+- none
 
 Edited:
 - crates/ccl-cli/src/main.rs
@@ -55,7 +55,7 @@ Deleted:
 - `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
 - `cargo run -p ccl-cli -- preflight --repo .`: PASS
 - `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
-- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo . --verbose`: PASS, if implemented
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo . --verbose`: PASS
 - `cargo run -p ccl-cli -- validate run --contract examples/ccl-env-policy-task-contract.json --repo .`: PASS WITH WARNINGS
 - `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1`: PASS
 - `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -VerboseEvidence`: PASS
