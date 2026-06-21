@@ -9,7 +9,7 @@ Status: PASS WITH WARNINGS
 - Workstream: CCL Phase 1
 - Task type: gate orchestration
 - Branch: feat/gate-orchestration-seed
-- PR: pending
+- PR: #11 — https://github.com/skulmakov-oss/CCL/pull/11
 - Base main HEAD: fed07726b334caf570d2b2526d2b240c9263ae6d
 
 ### Basis
