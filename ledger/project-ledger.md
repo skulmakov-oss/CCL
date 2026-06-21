@@ -106,6 +106,83 @@ Deleted:
 - recommended next gate: External Review Intake / Threat Model Notes Seed
 - reason: the evidence chain now includes ledger verification, so the next reduction is external review and threat-model hygiene.
 
+## 2026-06-21 — External Review Intake / Threat Model Notes Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Governance
+- Task type: documentation / threat model notes
+- Branch: docs/external-review-threat-model-seed
+- PR: #13
+- Base main HEAD: b03beb7949a77ace2125f8c262af8e057bbc984f
+
+### Basis
+
+- README.md
+- CCL_DNA.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- prior external review text provided by maintainer
+
+### Changed Files
+
+Created:
+- docs/reviews/external-review-intake.md
+- docs/security/threat-model-notes.md
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Review Intake Proof
+
+- external review recorded as testimony: YES
+- external review used as admission evidence: NO
+- findings classified: YES
+- hardening backlog created: YES
+- runtime behavior changed: NO
+
+### Boundary Conclusion
+
+- code behavior changed: NO
+- CCL admission authority changed: NO
+- external review authority added: NO
+- documentation added: YES
+- threat model notes added: YES
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- This PR records external review testimony but does not implement hardening items.
+- Threat model notes are seed-level and must be expanded as CCL grows.
+
+### Next Gate
+
+- recommended next gate: Demo Script Seed
+- reason: after the core gate is working and review risks are recorded, CCL needs a minimal repeatable demonstration workflow.
+
 ## 2026-06-21 — Gate Orchestration Seed
 
 Status: PASS WITH WARNINGS

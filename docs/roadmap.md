@@ -78,6 +78,23 @@ Expected behavior:
 
 Scope/diff policy checking, admission verdict from evidence, gate orchestration, and ledger semantic verification are the prerequisite fence before ledger enforcement can trust a working tree as admissible.
 
+## Phase 1.5 — Governance and Hardening Notes
+
+Goal: record external review testimony, known risks, and a deterministic hardening backlog without changing CCL runtime behavior.
+
+Expected work:
+
+- external review intake;
+- threat model notes;
+- demo script;
+- environment allowlist policy design;
+- manifest signing design;
+- process isolation hardening plan.
+
+Next implementation direction:
+
+Demo Script Seed
+
 ## Phase 4 — Tauri Desktop Shell
 
 Goal: provide a practical desktop interface over the deterministic core.
