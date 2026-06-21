@@ -5,6 +5,7 @@ use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::fs;
+use std::io::{BufRead, BufReader};
 use std::path::{Component, Path};
 use std::process::Command;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -325,6 +326,8 @@ pub fn run_scope_check(
     }
 
     let changed_files_count = entries_by_path.len();
+    let max_changed_files = contract.scope_limits.max_changed_files;
+    let max_diff_lines = contract.scope_limits.max_diff_lines;
     let mut diff_added_lines = 0usize;
     let mut diff_deleted_lines = 0usize;
 
@@ -345,13 +348,34 @@ pub fn run_scope_check(
             .map(|entry| entry.tracked)
             .unwrap_or(false)
         {
-            diff_added_lines += count_lines_in_file(&repo_root.join(path)).unwrap_or(0);
+            match count_lines_in_file_bounded(
+                &repo_root.join(path),
+                max_diff_lines.saturating_add(1),
+            ) {
+                Ok((count, truncated)) => {
+                    diff_added_lines += count;
+                    if truncated {
+                        warnings.push(ScopeWarning {
+                            kind: "untracked_line_count_truncated".to_string(),
+                            reason: format!(
+                                "untracked file {} exceeded bounded line count {}",
+                                path,
+                                max_diff_lines.saturating_add(1)
+                            ),
+                        });
+                    }
+                }
+                Err(error) => {
+                    warnings.push(ScopeWarning {
+                        kind: "untracked_line_count_failed".to_string(),
+                        reason: format!("failed to count lines for {}: {}", path, error),
+                    });
+                }
+            }
         }
     }
 
     let diff_total_lines = diff_added_lines.saturating_add(diff_deleted_lines);
-    let max_changed_files = contract.scope_limits.max_changed_files;
-    let max_diff_lines = contract.scope_limits.max_diff_lines;
 
     let mut violations = Vec::new();
     let mut limit_status = ScopeLimitStatus::WithinLimits;
@@ -587,11 +611,11 @@ fn parse_status_records(output: &str) -> Result<Vec<RawStatusEntry>, ScopeCheckE
         }
 
         if status_code.contains('R') || status_code.contains('C') {
-            let new_path = items.next().ok_or_else(|| {
-                ScopeCheckError::Git("rename status record missing new path".to_string())
+            let _old_path = items.next().ok_or_else(|| {
+                ScopeCheckError::Git("rename status record missing original path".to_string())
             })?;
             records.push(RawStatusEntry {
-                path: normalize_repo_relative_path(&new_path),
+                path,
                 tracked: true,
                 status_code,
             });
@@ -670,16 +694,28 @@ fn parse_numstat_value(value: &str) -> usize {
     }
 }
 
-fn count_lines_in_file(path: &Path) -> Result<usize, std::io::Error> {
-    let bytes = fs::read(path)?;
-    if bytes.is_empty() {
-        return Ok(0);
-    }
-    let mut lines = bytes.iter().filter(|byte| **byte == b'\n').count();
-    if !bytes.ends_with(b"\n") {
+fn count_lines_in_file_bounded(
+    path: &Path,
+    max_lines: usize,
+) -> Result<(usize, bool), std::io::Error> {
+    let file = fs::File::open(path)?;
+    let mut reader = BufReader::new(file);
+    let mut lines = 0usize;
+    let mut buffer = Vec::new();
+
+    loop {
+        buffer.clear();
+        let bytes_read = reader.read_until(b'\n', &mut buffer)?;
+        if bytes_read == 0 {
+            break;
+        }
         lines += 1;
+        if lines >= max_lines {
+            return Ok((lines, true));
+        }
     }
-    Ok(lines)
+
+    Ok((lines, false))
 }
 
 fn normalize_repo_relative_path(path: &str) -> String {
@@ -973,6 +1009,37 @@ mod tests {
     }
 
     #[test]
+    fn rename_to_forbidden_path_fails() {
+        let repo = repo_dir();
+        write_and_commit(&repo, "src/allowed.rs", "pub fn allowed() {}\n");
+        fs::create_dir_all(repo.join(".github/workflows")).unwrap();
+        let _ = Command::new("git")
+            .args([
+                "-C",
+                repo.to_str().unwrap(),
+                "mv",
+                "src/allowed.rs",
+                ".github/workflows/ci.yml",
+            ])
+            .status()
+            .unwrap();
+        let contract = contract_file(&base_contract(&["src/**"], &[".github/**"], (25, 1500)));
+
+        let outcome = run_scope(&repo, &contract);
+        assert_eq!(outcome.manifest.status, ScopeCheckStatus::Fail);
+        assert!(outcome
+            .manifest
+            .violations
+            .iter()
+            .any(|violation| violation.kind == "forbidden_path_changed"));
+        assert!(outcome
+            .manifest
+            .files
+            .iter()
+            .any(|entry| entry.path == ".github/workflows/ci.yml"));
+    }
+
+    #[test]
     fn outside_allowed_scope_fails() {
         let repo = repo_dir();
         write_and_commit(&repo, "src/app.rs", "fn main() {}\n");
@@ -1055,6 +1122,31 @@ mod tests {
         let outcome = run_scope(&repo, &contract);
         assert_eq!(outcome.manifest.status, ScopeCheckStatus::Fail);
         assert!(outcome.manifest.summary.diff_total_lines > 10);
+    }
+
+    #[test]
+    fn oversized_untracked_file_exceeds_diff_limit_without_full_read() {
+        let repo = repo_dir();
+        write_and_commit(&repo, "src/app.rs", "fn main() {}\n");
+        let oversized = repo.join("src/oversized.txt");
+        let mut content = String::new();
+        for i in 0..1024 {
+            content.push_str(&format!("line {}\n", i));
+        }
+        fs::write(&oversized, &content).unwrap();
+        let contract = contract_file(&base_contract(&["src/**"], &[".github/**"], (25, 10)));
+
+        let outcome = run_scope(&repo, &contract);
+        assert_eq!(outcome.manifest.status, ScopeCheckStatus::Fail);
+        assert!(matches!(
+            outcome.manifest.summary.limit_status,
+            ScopeLimitStatus::Exceeded
+        ));
+        assert!(outcome
+            .manifest
+            .violations
+            .iter()
+            .any(|violation| violation.kind == "diff_limit_exceeded"));
     }
 
     #[test]
