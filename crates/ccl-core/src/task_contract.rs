@@ -33,6 +33,8 @@ pub struct TaskContract {
     pub required_validation: Vec<String>,
     #[serde(default)]
     pub validation: ValidationPlan,
+    #[serde(default)]
+    pub scope_limits: ScopeLimits,
     pub github_ci_as_evidence: bool,
     pub ledger_update_required: bool,
     #[serde(default)]
@@ -63,6 +65,31 @@ fn default_required() -> bool {
 
 fn default_validation_wall_timeout_seconds() -> u64 {
     300
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScopeLimits {
+    #[serde(default = "default_max_changed_files")]
+    pub max_changed_files: usize,
+    #[serde(default = "default_max_diff_lines")]
+    pub max_diff_lines: usize,
+}
+
+impl Default for ScopeLimits {
+    fn default() -> Self {
+        Self {
+            max_changed_files: default_max_changed_files(),
+            max_diff_lines: default_max_diff_lines(),
+        }
+    }
+}
+
+fn default_max_changed_files() -> usize {
+    25
+}
+
+fn default_max_diff_lines() -> usize {
+    1500
 }
 
 #[derive(Debug, Clone)]

@@ -1,0 +1,37 @@
+{
+  "project": "CCL",
+  "workstream": "Scope",
+  "task_type": "guard_gate",
+  "objective": "Check repository changes against contract scope and diff limits.",
+  "required_context": {
+    "dna": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "README.md",
+    "crates/ccl-core/**",
+    "crates/ccl-cli/**",
+    "docs/**",
+    "examples/**",
+    "ledger/**",
+    "ci/**"
+  ],
+  "forbidden_paths": [
+    ".github/**"
+  ],
+  "required_validation": [
+    "scope check"
+  ],
+  "scope_limits": {
+    "max_changed_files": 25,
+    "max_diff_lines": 1500
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "Changes stay inside allowed scope and diff limits.",
+    "pass_with_warnings": "Scope check passed with non-blocking warnings.",
+    "fail": "Changes violated scope or diff limits."
+  }
+}

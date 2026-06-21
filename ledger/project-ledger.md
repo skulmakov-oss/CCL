@@ -1,5 +1,99 @@
 # CCL Project Ledger
 
+## 2026-06-21 — Scope/Diff Policy Check Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Phase 1
+- Task type: scope policy
+- Branch: feat/scope-diff-policy-check-seed
+- PR: not created yet
+- Base main HEAD: 94f06df5fa3041f6d31f58791ce1e3c12eba7b4a
+
+### Basis
+
+- README.md
+- CCL_DNA.md
+- docs/architecture.md
+- docs/task-contract.md
+- docs/agent-report-format.md
+- docs/project-ledger.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- examples/semantic-task-contract.json
+- examples/ccl-validation-task-contract.json
+- crates/ccl-core/src/task_contract.rs
+- crates/ccl-core/src/capture.rs
+- crates/ccl-core/src/evidence.rs
+- crates/ccl-core/src/validation_runner.rs
+- crates/ccl-core/src/verdict.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/scope.rs
+- examples/ccl-scope-task-contract.json
+
+Edited:
+- README.md
+- crates/ccl-cli/src/main.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/task_contract.rs
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version`: PASS
+- `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\ci\admission.ps1 --full`: PASS
+- `cargo run -p ccl-cli -- validate run --contract examples/ccl-validation-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- scope check --contract examples/ccl-scope-task-contract.json --repo .`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Scope Check Proof
+
+- contract path: `examples/ccl-scope-task-contract.json`
+- command: `cargo run -p ccl-cli -- scope check --contract examples/ccl-scope-task-contract.json --repo .`
+- status: PASS
+- manifest path: `.ccl/runs/scope-1782032462673-19408/scope-check-manifest.json`
+- changed files count: 7
+- untracked files count: 2
+- diff lines: 1265
+- violations count: 0
+
+### Boundary Conclusion
+
+- scope checker added: YES
+- untracked files included: YES
+- forbidden paths evaluated before allowed paths: YES
+- diff limits enforced: YES
+- admission verdict still future work: YES
+
+### Warnings
+
+- Full CCL admission layer is still not implemented; this PR only adds scope/diff policy checking.
+
+### Next Gate
+
+- recommended next gate: Admission Verdict From Evidence Seed
+- reason: scope policy now fences the working tree; next step is to combine scope and validation evidence into admission
+
 ## 2026-06-20 — Evidence Manifest + Contract-bound Validation Runner
 
 Status: PASS WITH WARNINGS

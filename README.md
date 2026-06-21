@@ -185,6 +185,8 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/roadmap.md`](docs/roadmap.md) — conservative MVP roadmap.
 - [`ledger/project-ledger.md`](ledger/project-ledger.md) — active project ledger.
 - [`examples/semantic-task-contract.json`](examples/semantic-task-contract.json) — initial Semantic task contract example.
+- [`examples/ccl-validation-task-contract.json`](examples/ccl-validation-task-contract.json) — validation runner example contract.
+- [`examples/ccl-scope-task-contract.json`](examples/ccl-scope-task-contract.json) — scope/diff policy check example contract.
 
 ---
 
@@ -202,11 +204,12 @@ Current implemented direction:
 - command evidence capture;
 - project ledger discipline;
 - contract-bound validation runner.
+- scope/diff policy check.
 
 Next implementation direction:
 
 ```text
-Scope/Diff Policy Check Seed
+Admission Verdict From Evidence Seed
 ```
 
 Current capture layer already supports:
@@ -246,6 +249,12 @@ Production-like local validation capture:
 
 ```powershell
 cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- <local-admission-guard-command>
+```
+
+Scope policy check:
+
+```powershell
+cargo run -p ccl-cli -- scope check --contract examples/ccl-scope-task-contract.json --repo .
 ```
 
 Future admission runner:

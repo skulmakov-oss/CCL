@@ -1,6 +1,7 @@
 use ccl_core::capture::{capture_command, CaptureError};
 use ccl_core::evidence::{CapturePolicy, CaptureRequest, CommandSpec};
 use ccl_core::preflight;
+use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
 use ccl_core::validation_runner::{self, ValidationRunStatus};
 use ccl_core::verdict::VerdictStatus;
@@ -50,6 +51,11 @@ enum Commands {
         #[command(subcommand)]
         action: ValidateCommands,
     },
+    /// Run scope/diff policy checking
+    Scope {
+        #[command(subcommand)]
+        action: ScopeCommands,
+    },
 }
 
 #[derive(Subcommand)]
@@ -60,6 +66,16 @@ enum ContractCommands {
 #[derive(Subcommand)]
 enum ValidateCommands {
     Run {
+        #[arg(long)]
+        contract: PathBuf,
+        #[arg(long)]
+        repo: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum ScopeCommands {
+    Check {
         #[arg(long)]
         contract: PathBuf,
         #[arg(long)]
@@ -211,6 +227,19 @@ fn main() {
                 }
             }
         },
+        Some(Commands::Scope { action }) => match action {
+            ScopeCommands::Check { contract, repo } => match scope::run_scope_check(contract, repo)
+            {
+                Ok(outcome) => {
+                    print_scope_check(&outcome.manifest, contract, repo, &outcome.manifest_path);
+                    std::process::exit(scope_exit_code(&outcome.manifest.status));
+                }
+                Err(err) => {
+                    eprintln!("Scope checker error: {}", err);
+                    std::process::exit(40);
+                }
+            },
+        },
         None => {}
     }
 }
@@ -265,5 +294,49 @@ fn validation_exit_code(status: &ValidationRunStatus) -> i32 {
         ValidationRunStatus::PassWithWarnings => 10,
         ValidationRunStatus::Fail => 20,
         ValidationRunStatus::ContractFail => 30,
+    }
+}
+
+fn print_scope_check(
+    manifest: &scope::ScopeCheckManifest,
+    contract: &Path,
+    repo: &Path,
+    manifest_path: &str,
+) {
+    println!("CCL scope check");
+    println!("Contract: {}", contract.display());
+    println!("Repo: {}", repo.display());
+    println!("Status: {}", manifest.status);
+    println!();
+    println!("Summary:");
+    println!("- changed files: {}", manifest.summary.changed_files_count);
+    println!(
+        "- untracked files: {}",
+        manifest.summary.untracked_files_count
+    );
+    println!(
+        "- diff lines: {} / {}",
+        manifest.summary.diff_total_lines, manifest.summary.max_diff_lines
+    );
+    if !manifest.violations.is_empty() {
+        println!();
+        println!("Violations:");
+        for violation in &manifest.violations {
+            println!("- {}: {}", violation.kind, violation.path);
+        }
+    }
+    println!();
+    println!("Manifest:");
+    println!("{}", manifest_path);
+    println!();
+    println!("GitHub CI used as evidence: NO");
+}
+
+fn scope_exit_code(status: &ScopeCheckStatus) -> i32 {
+    match status {
+        ScopeCheckStatus::Pass => 0,
+        ScopeCheckStatus::PassWithWarnings => 10,
+        ScopeCheckStatus::Fail => 20,
+        ScopeCheckStatus::ContractFail => 30,
     }
 }
