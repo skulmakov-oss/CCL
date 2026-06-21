@@ -9,7 +9,7 @@ Status: PASS WITH WARNINGS
 - Workstream: CCL Phase 1
 - Task type: admission verdict
 - Branch: feat/admission-verdict-from-evidence-seed
-- PR: pending creation
+- PR: #9 — https://github.com/skulmakov-oss/CCL/pull/9
 - Base main HEAD: fc569f1127cd2352771d5c88a3ef885973fdb5a2
 
 ### Basis
