@@ -21,6 +21,8 @@ if [[ ! -d ".git" ]]; then
   exit 1
 fi
 
+DEMO_CONTRACT="${CCL_DEMO_CONTRACT:-examples/ccl-admission-task-contract.json}"
+
 resolve_cargo() {
   if command -v cargo >/dev/null 2>&1; then
     command -v cargo
@@ -74,24 +76,24 @@ run_step "CCL version" \
   "$CARGO_BIN" run -p ccl-cli -- --version
 
 run_step "Contract check" \
-  "$CARGO_BIN" run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json
+  "$CARGO_BIN" run -p ccl-cli -- contract check "$DEMO_CONTRACT"
 
 run_step "Repository preflight" \
   "$CARGO_BIN" run -p ccl-cli -- preflight --repo .
 
 if [[ "$VERBOSE_EVIDENCE" == "1" ]]; then
   run_step "Validation runner" \
-    "$CARGO_BIN" run -p ccl-cli -- validate run --contract examples/ccl-admission-task-contract.json --repo .
+    "$CARGO_BIN" run -p ccl-cli -- validate run --contract "$DEMO_CONTRACT" --repo .
 
   run_step "Scope check" \
-    "$CARGO_BIN" run -p ccl-cli -- scope check --contract examples/ccl-admission-task-contract.json --repo .
+    "$CARGO_BIN" run -p ccl-cli -- scope check --contract "$DEMO_CONTRACT" --repo .
 
   run_step "Ledger verification" \
-    "$CARGO_BIN" run -p ccl-cli -- ledger verify --contract examples/ccl-admission-task-contract.json --repo .
+    "$CARGO_BIN" run -p ccl-cli -- ledger verify --contract "$DEMO_CONTRACT" --repo .
 fi
 
 run_step "Gate run" \
-  "$CARGO_BIN" run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
+  "$CARGO_BIN" run -p ccl-cli -- gate run --contract "$DEMO_CONTRACT" --repo .
 
 echo
 echo "CCL demo completed."

@@ -249,6 +249,7 @@ See [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.m
 CCL uses GitHub Actions as public project metadata only.
 
 A green GitHub check does not replace local CCL evidence.
+The public CI demo path sets `CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json` so Bash demo checks stay Linux-safe.
 
 The public CI workflow uses a separate Linux-safe CI metadata contract for smoke checks and demo checks.
 

@@ -38,6 +38,8 @@ Edited:
 - docs/roadmap.md
 - ledger/project-ledger.md
 - crates/ccl-core/src/environment.rs
+- scripts/demo.sh
+- examples/ccl-admission-task-contract.json
 
 Deleted:
 - none
