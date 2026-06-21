@@ -1,5 +1,88 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Codex Dogfood Trial Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: Docs
+- Task type: docs_gate
+- Branch: dogfood/codex-docs-contract-trial
+- PR: #20
+- Base main HEAD: 510e4912256574f2c40328bad56410d73fbcf7ad
+
+### Basis
+
+- docs/agent-task-contract-examples.md
+- examples/agent-docs-task-contract.json
+- ledger/project-ledger.md
+
+### Changed Files
+
+Created:
+- none
+
+Edited:
+- docs/agent-task-contract-examples.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/agent-docs-task-contract.json --repo .`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1`: PASS
+- `bash scripts/demo.sh`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Dogfood Proof
+
+- Project: CCL
+- Workstream: Docs
+- Task type: docs_gate
+- Objective: improve clarify repository documentation without changing runtime behavior
+- Status: PASS
+- GitHub CI used as evidence: NO
+- Gate Proof
+  - contract path: examples/agent-docs-task-contract.json
+  - command: cargo run -p ccl-cli -- gate run --contract examples/agent-docs-task-contract.json --repo .
+  - status: PASS
+  - gate manifest path: .ccl/runs/gate-.../gate-run-manifest.json
+- docs-only contract used: YES
+- allowed paths respected: YES
+- forbidden paths untouched: YES
+- runtime behavior changed: NO
+- agent report used as evidence: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- code behavior changed: NO
+- runtime behavior changed: NO
+- dogfood trial stayed docs-only: YES
+- CCL admission authority changed: NO
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- This is a controlled dogfood trial, not a stress test.
+- The trial demonstrates CCL boundary handling, not agent autonomy.
+- The contract example is a template and should be adapted for real use.
+
+### Next Gate
+
+- recommended next gate: Public CI Metadata Seed
+- reason: after a successful docs-only dogfood trial, project hygiene can add public CI metadata while preserving local CCL admission authority.
+
 ## 2026-06-21 — Real AI-Agent Task Contract Examples Seed
 
 Status: PASS WITH WARNINGS

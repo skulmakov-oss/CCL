@@ -68,6 +68,15 @@ Adapt the contract to the specific task before running real work.
 4. Run CCL locally.
 5. Review the evidence artifacts and verdict.
 
+## How to Choose an Example
+
+- Use `agent-docs-task-contract.json` when the work is limited to documentation, roadmap, or other non-code edits.
+- Use `agent-test-fix-task-contract.json` when a focused test or helper fix is needed and the scope is still narrow.
+- Use `agent-refactor-task-contract.json` when the work should preserve behavior but may touch internal CCL implementation details.
+- Use `agent-small-feature-task-contract.json` when a narrow feature or UX improvement is needed and the validation boundary is strict.
+
+Start with the lowest-risk example that still matches the task. If the task needs broader scope, write a new contract rather than stretching the example beyond its boundary.
+
 ## Evidence Boundary
 
 These examples are not evidence.
