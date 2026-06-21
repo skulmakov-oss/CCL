@@ -102,6 +102,7 @@ Gate Run UX Summary Seed improves the human-readable `ccl gate run` output with 
 Real AI-Agent Task Contract Examples Seed provides realistic example contracts for docs-only, test-fix, refactor, and small feature agent workflows.
 
 Public CI Metadata Seed adds GitHub Actions as public project hygiene while preserving local CCL gate as admission authority.
+Public CI Metadata Compatibility Fix keeps that workflow green on Linux by using a separate CI metadata contract and a demo override.
 
 Release Packaging / Install Notes Seed documents source installation, local verification, demo execution, and future release packaging boundaries.
 

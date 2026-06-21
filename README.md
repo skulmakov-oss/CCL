@@ -204,6 +204,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`examples/agent-test-fix-task-contract.json`](examples/agent-test-fix-task-contract.json) — focused test-fix agent task example.
 - [`examples/agent-refactor-task-contract.json`](examples/agent-refactor-task-contract.json) — constrained refactor agent task example.
 - [`examples/agent-small-feature-task-contract.json`](examples/agent-small-feature-task-contract.json) — narrow feature agent task example.
+- [`examples/ccl-ci-metadata-task-contract.json`](examples/ccl-ci-metadata-task-contract.json) — Linux-compatible public CI metadata contract example.
 
 ---
 
@@ -248,6 +249,9 @@ See [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.m
 CCL uses GitHub Actions as public project metadata only.
 
 A green GitHub check does not replace local CCL evidence.
+The public CI demo path sets `CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json` so Bash demo checks stay Linux-safe.
+
+The public CI workflow uses a separate Linux-safe CI metadata contract for smoke checks and demo checks.
 
 ```powershell
 cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .

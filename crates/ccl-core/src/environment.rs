@@ -582,7 +582,7 @@ mod tests {
             allow: vec!["path".to_string()],
             ..EnvironmentPolicy::default()
         };
-        let result = policy.evaluate(&env(&[("PATH", "/usr/bin")]));
+        let result = policy.evaluate(&env(&[("PaTh", "/usr/bin")]));
         if cfg!(windows) {
             assert_eq!(
                 result.variables[0].match_rule,

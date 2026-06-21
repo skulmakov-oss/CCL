@@ -8,8 +8,8 @@ This document explains the public GitHub Actions workflow for CCL and the bounda
 
 - basic Rust formatting and test health;
 - contract validation for the checked-in example task contracts;
-- a local CCL gate smoke check;
-- the repeatable Bash demo flow;
+- a Linux-compatible CCL gate smoke check using `examples/ccl-ci-metadata-task-contract.json`;
+- the repeatable Bash demo flow with the same CI metadata contract override via `CCL_DEMO_CONTRACT`;
 - `clippy` on all targets and features.
 
 ## What GitHub CI Does Not Prove
@@ -25,6 +25,10 @@ This document explains the public GitHub Actions workflow for CCL and the bounda
 GitHub CI is public project metadata.
 GitHub CI is not final CCL evidence.
 A green GitHub check cannot replace local `ccl gate run`.
+
+The CI workflow uses a separate Linux-safe CI metadata contract for smoke checks.
+That contract is public metadata only and does not replace the local admission contract.
+The Bash demo script reads `CCL_DEMO_CONTRACT` when set so CI can stay Linux-safe without changing the default local demo contract.
 
 ## Local Evidence Requirement
 

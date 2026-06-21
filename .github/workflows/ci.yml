@@ -57,12 +57,13 @@ jobs:
           cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json
           cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json
           cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json
 
       - name: Preflight
         run: cargo run -p ccl-cli -- preflight --repo .
 
       - name: Gate smoke check
-        run: cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
+        run: cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .
 
   demo-checks:
     name: Demo checks
@@ -79,8 +80,8 @@ jobs:
 
       - name: Bash demo
         run: |
-          bash scripts/demo.sh
-          bash scripts/demo.sh --verbose-evidence
+          CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json bash scripts/demo.sh
+          CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json bash scripts/demo.sh --verbose-evidence
 
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
