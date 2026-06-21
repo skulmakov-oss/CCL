@@ -97,9 +97,11 @@ Environment Allowlist Enforcement Seed implements deterministic policy evaluatio
 
 Demo Script Seed records a repeatable local demonstration of the current CCL gate pipeline without changing runtime behavior. The seed includes Windows PowerShell and Bash entrypoints for the same deterministic sequence.
 
+Gate Run UX Summary Seed improves the human-readable `ccl gate run` output with layer statuses, environment policy status, counts, and artifact paths without changing admission authority.
+
 Next implementation direction:
 
-Gate Run UX Summary Seed
+Real AI-Agent Task Contract Examples Seed
 
 ## Phase 4 — Tauri Desktop Shell
 

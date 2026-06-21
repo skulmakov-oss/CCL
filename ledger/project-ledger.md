@@ -1,5 +1,104 @@
 # CCL Project Ledger
 
+## 2026-06-21 — Gate Run UX Summary Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Developer Experience
+- Task type: CLI UX summary
+- Branch: feat/gate-run-ux-summary-seed
+- PR: #18
+- Base main HEAD: 94f73434100bebce5a56984d05c2a8a1e7c0f97b
+
+### Basis
+
+- crates/ccl-cli/src/main.rs
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/admission.rs
+- crates/ccl-core/src/validation_runner.rs
+- crates/ccl-core/src/environment.rs
+- README.md
+- docs/demo.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+### Changed Files
+
+Created:
+- none, unless a small formatting helper module is justified
+
+Edited:
+- crates/ccl-cli/src/main.rs
+- crates/ccl-cli/Cargo.toml
+- Cargo.lock
+- README.md
+- docs/demo.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo . --verbose`: PASS, if implemented
+- `cargo run -p ccl-cli -- validate run --contract examples/ccl-env-policy-task-contract.json --repo .`: PASS WITH WARNINGS
+- `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -VerboseEvidence`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### UX Summary Proof
+
+- gate run summary added: YES
+- validation status printed: YES
+- scope status printed: YES
+- ledger status printed: YES
+- environment policy status printed: YES
+- admission status printed: YES
+- artifact paths printed: YES
+- warning/violation counts printed: YES
+- `--verbose` added: YES
+- exit code behavior changed: NO
+- admission authority changed: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- runtime admission behavior changed: NO
+- evidence semantics changed: NO
+- CLI readability improved: YES
+- manifest authority preserved: YES
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- This PR improves human-readable reporting only.
+- It does not add new admission authority.
+- It does not implement JSON output mode.
+- It does not implement sandboxing or manifest signing.
+
+### Next Gate
+
+- recommended next gate: Real AI-Agent Task Contract Examples Seed
+- reason: after gate output is readable, CCL needs realistic example contracts for common agent workflows.
+
 ## 2026-06-21 — Environment Allowlist Policy Design Seed
 
 Status: PASS WITH WARNINGS
