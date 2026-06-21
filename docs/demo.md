@@ -8,7 +8,7 @@ This demo shows the current deterministic CCL gate pipeline from the repository 
 
 - CCL can check the admission contract locally.
 - CCL can run repository preflight locally.
-- CCL can execute the current gate pipeline and write manifests under `.ccl/runs/`.
+- CCL can execute the current gate pipeline, print a readable summary, and write manifests under `.ccl/runs/`.
 - The demo uses captured local evidence-producing commands, not GitHub CI.
 
 ## What This Demo Does Not Prove
@@ -47,10 +47,12 @@ Verbose mode also shows:
 - validation runner;
 - scope check;
 - ledger verification.
+- environment policy summary.
 
 ## Expected Output
 
-The script prints step headings and ends with a clear completion message.
+The script prints step headings and a gate summary with layer statuses, counts,
+environment policy status, and artifact paths.
 
 The authoritative result is the CCL gate status printed by `ccl gate run`.
 

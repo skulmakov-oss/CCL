@@ -222,7 +222,7 @@ Current implemented direction:
 Next implementation direction:
 
 ```text
-Gate Run UX Summary Seed
+Real AI-Agent Task Contract Examples Seed
 ```
 
 Current capture layer already supports:
@@ -275,6 +275,9 @@ Gate orchestration:
 ```powershell
 cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
 ```
+
+The gate command prints a human-readable summary with layer statuses, counts,
+and artifact paths before exiting with the admission-derived status.
 
 Ledger verification:
 
