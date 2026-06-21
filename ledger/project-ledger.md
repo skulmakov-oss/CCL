@@ -1,5 +1,99 @@
 # CCL Project Ledger
 
+## 2026-06-21 — Gate Orchestration Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Phase 1
+- Task type: gate orchestration
+- Branch: feat/gate-orchestration-seed
+- PR: #11 — https://github.com/skulmakov-oss/CCL/pull/11
+- Base main HEAD: fed07726b334caf570d2b2526d2b240c9263ae6d
+
+### Basis
+
+- README.md
+- docs/roadmap.md
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+- crates/ccl-core/src/validation_runner.rs
+- ledger/project-ledger.md
+- examples/ccl-admission-task-contract.json
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/gate.rs
+
+Edited:
+- README.md
+- crates/ccl-cli/src/main.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/validation_runner.rs
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version`: PASS
+- `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\\ci\\admission.ps1 --full`: PASS
+- `cargo run -p ccl-cli -- validate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- scope check --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS WITH WARNINGS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Gate Proof
+
+- contract path: `examples/ccl-admission-task-contract.json`
+- command: `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`
+- status: PASS WITH WARNINGS
+- gate manifest path: `.ccl/runs/gate-1782042385304-848/gate-run-manifest.json`
+- validation manifest path: `.ccl/runs/validation-1782042385306-848/validation-run-manifest.json`
+- scope manifest path: `.ccl/runs/scope-1782042431232-848/scope-check-manifest.json`
+- admission verdict path: `.ccl/runs/admission-1782042431963-848/admission-verdict.json`
+- validation status: PASS
+- scope status: PASS
+- admission status: PASS WITH WARNINGS
+- warnings count: 1
+- violations count: 0
+
+### Boundary Conclusion
+
+- gate run command added: YES
+- validation runner invoked: YES
+- scope checker invoked: YES
+- admission verdict invoked: YES
+- gate manifest written: YES
+- agent execution added: NO
+- retry loop added: NO
+- LLM hints added: NO
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- Full agent workflow integration is still future work.
+- Ledger semantic verification is still future work, so the gate resolves to PASS WITH WARNINGS.
+
+### Next Gate
+
+- recommended next gate: Ledger Semantic Verification Seed
+
 ## 2026-06-21 — Admission Verdict From Evidence Seed
 
 Status: PASS WITH WARNINGS

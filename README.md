@@ -207,11 +207,12 @@ Current implemented direction:
 - contract-bound validation runner.
 - scope/diff policy check.
 - admission verdict from evidence.
+- gate orchestration.
 
 Next implementation direction:
 
 ```text
-Gate Orchestration Seed
+Ledger Semantic Verification Seed
 ```
 
 Current capture layer already supports:
@@ -259,10 +260,16 @@ Scope policy check:
 cargo run -p ccl-cli -- scope check --contract examples/ccl-scope-task-contract.json --repo .
 ```
 
-Future admission runner:
+Gate orchestration:
 
 ```powershell
-ccl validate run --contract examples/ccl-validation-task-contract.json --repo .
+cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
+```
+
+Admission verdict from existing evidence:
+
+```powershell
+cargo run -p ccl-cli -- admission verdict --contract examples/ccl-admission-task-contract.json --repo . --validation-manifest <validation-manifest> --scope-manifest <scope-manifest>
 ```
 
 ---

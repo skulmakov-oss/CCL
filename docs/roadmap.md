@@ -76,7 +76,7 @@ Expected behavior:
 - compare ledger claims with captured evidence;
 - reject completion when ledger requirements are missing.
 
-Scope/diff policy checking and admission verdict from evidence are the prerequisite fence before ledger enforcement can trust a working tree as admissible.
+Scope/diff policy checking, admission verdict from evidence, and gate orchestration are the prerequisite fence before ledger enforcement can trust a working tree as admissible.
 
 ## Phase 4 — Tauri Desktop Shell
 

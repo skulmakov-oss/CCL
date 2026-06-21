@@ -1,6 +1,7 @@
 use ccl_core::admission;
 use ccl_core::capture::{capture_command, CaptureError};
 use ccl_core::evidence::{CapturePolicy, CaptureRequest, CommandSpec};
+use ccl_core::gate::{self, GateRunRequest};
 use ccl_core::preflight;
 use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
@@ -62,6 +63,11 @@ enum Commands {
         #[command(subcommand)]
         action: AdmissionCommands,
     },
+    /// Run the full gate orchestration
+    Gate {
+        #[command(subcommand)]
+        action: GateCommands,
+    },
 }
 
 #[derive(Subcommand)]
@@ -102,6 +108,16 @@ enum AdmissionCommands {
         scope_manifest: PathBuf,
         #[arg(long, default_value = "ledger/project-ledger.md")]
         ledger: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum GateCommands {
+    Run {
+        #[arg(long)]
+        contract: PathBuf,
+        #[arg(long)]
+        repo: PathBuf,
     },
 }
 
@@ -291,6 +307,23 @@ fn main() {
                 }
             },
         },
+        Some(Commands::Gate { action }) => match action {
+            GateCommands::Run { contract, repo } => {
+                match gate::run_gate(GateRunRequest {
+                    contract_path: contract.clone(),
+                    repo: repo.clone(),
+                }) {
+                    Ok(outcome) => {
+                        print_gate_run(&outcome.manifest, contract, repo, &outcome.manifest_path);
+                        std::process::exit(admission_exit_code(&outcome.manifest.status));
+                    }
+                    Err(err) => {
+                        eprintln!("Gate orchestration error: {}", err);
+                        std::process::exit(40);
+                    }
+                }
+            }
+        },
         None => {}
     }
 }
@@ -439,6 +472,47 @@ fn print_admission_verdict(
     }
     println!("Manifest:");
     println!("{}", manifest_path);
+}
+
+fn print_gate_run(
+    manifest: &gate::GateRunManifest,
+    contract: &Path,
+    repo: &Path,
+    manifest_path: &str,
+) {
+    println!("CCL gate run");
+    println!("Contract: {}", contract.display());
+    println!("Repo: {}", repo.display());
+    println!("Status: {}", manifest.status);
+    println!();
+    println!("Steps:");
+    for step in &manifest.steps {
+        println!("- {}: {}", step.name, step.status);
+    }
+    println!();
+    println!("Artifacts:");
+    for step in &manifest.steps {
+        println!("- {}: {}", step.name, step.manifest_path);
+    }
+    if !manifest.warnings.is_empty() {
+        println!();
+        println!("Warnings:");
+        for warning in &manifest.warnings {
+            println!("- {}: {}", warning.kind, warning.reason);
+        }
+    }
+    if !manifest.violations.is_empty() {
+        println!();
+        println!("Violations:");
+        for violation in &manifest.violations {
+            println!("- {}: {}", violation.kind, violation.reason);
+        }
+    }
+    println!();
+    println!("Manifest:");
+    println!("{}", manifest_path);
+    println!();
+    println!("GitHub CI used as evidence: NO");
 }
 
 fn admission_exit_code(status: &AdmissionStatus) -> i32 {

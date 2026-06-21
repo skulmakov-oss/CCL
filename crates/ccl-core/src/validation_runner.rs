@@ -330,13 +330,18 @@ fn repo_relative_string(repo: &Path, path: impl AsRef<Path>) -> String {
 mod tests {
     use super::*;
     use std::process::Command;
+    use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::OnceLock;
 
+    static COUNTER: AtomicUsize = AtomicUsize::new(0);
+
     fn repo_dir() -> PathBuf {
+        let unique = COUNTER.fetch_add(1, Ordering::SeqCst);
         let dir = std::env::temp_dir().join(format!(
-            "ccl_validation_repo_{}_{}",
+            "ccl_validation_repo_{}_{}_{}",
             std::process::id(),
-            system_time_ms(SystemTime::now())
+            system_time_ms(SystemTime::now()),
+            unique
         ));
         fs::create_dir_all(dir.join(".git")).unwrap();
         dir
