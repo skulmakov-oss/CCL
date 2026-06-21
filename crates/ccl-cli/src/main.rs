@@ -564,10 +564,10 @@ fn print_gate_run(
 
     let validation_manifest = validation_manifest_path
         .as_deref()
-        .and_then(load_validation_manifest);
+        .and_then(|path| load_validation_manifest(repo, path));
     let admission_manifest = admission_manifest_path
         .as_deref()
-        .and_then(load_admission_manifest);
+        .and_then(|path| load_admission_manifest(repo, path));
 
     let environment_policy = validation_manifest
         .as_ref()
@@ -780,16 +780,28 @@ fn gate_step_status(manifest: &gate::GateRunManifest, name: gate::GateStepName) 
         .unwrap_or_else(|| "N/A".to_string())
 }
 
-fn load_validation_manifest(path: &str) -> Option<ValidationRunManifest> {
-    fs::read_to_string(path)
+fn load_validation_manifest(repo: &Path, path: &str) -> Option<ValidationRunManifest> {
+    fs::read_to_string(resolve_manifest_path(repo, path))
         .ok()
         .and_then(|content| serde_json::from_str(&content).ok())
 }
 
-fn load_admission_manifest(path: &str) -> Option<ccl_core::admission::AdmissionVerdictManifest> {
-    fs::read_to_string(path)
+fn load_admission_manifest(
+    repo: &Path,
+    path: &str,
+) -> Option<ccl_core::admission::AdmissionVerdictManifest> {
+    fs::read_to_string(resolve_manifest_path(repo, path))
         .ok()
         .and_then(|content| serde_json::from_str(&content).ok())
+}
+
+fn resolve_manifest_path(repo: &Path, path: &str) -> PathBuf {
+    let path = PathBuf::from(path);
+    if path.is_absolute() {
+        path
+    } else {
+        repo.join(path)
+    }
 }
 
 #[cfg(test)]
@@ -960,10 +972,10 @@ mod tests {
         )
         .unwrap();
 
-        let loaded_validation = load_validation_manifest(validation_path.to_str().unwrap())
+        let loaded_validation = load_validation_manifest(&dir, "validation.json")
             .expect("validation manifest should load");
-        let loaded_admission = load_admission_manifest(admission_path.to_str().unwrap())
-            .expect("admission should load");
+        let loaded_admission =
+            load_admission_manifest(&dir, "admission.json").expect("admission should load");
 
         assert_eq!(
             loaded_validation.environment_policy.status,
@@ -975,6 +987,106 @@ mod tests {
                 .ledger_verification_status
                 .as_deref(),
             Some("PASS")
+        );
+        assert_eq!(
+            loaded_admission
+                .evidence
+                .ledger_verification_manifest_path
+                .as_deref(),
+            Some(".ccl/runs/ledger-1/ledger-verification-manifest.json")
+        );
+    }
+
+    #[test]
+    fn manifest_loaders_resolve_repo_relative_paths() {
+        let repo = temp_dir("ccl_gate_summary_repo");
+        let validation_dir = repo.join(".ccl").join("runs").join("validation-1");
+        let admission_dir = repo.join(".ccl").join("runs").join("admission-1");
+        fs::create_dir_all(&validation_dir).unwrap();
+        fs::create_dir_all(&admission_dir).unwrap();
+
+        let validation = ValidationRunManifest {
+            schema_version: 1,
+            validation_run_id: "validation-1".to_string(),
+            contract_path: "examples/ccl-admission-task-contract.json".to_string(),
+            contract_sha256: "abc".to_string(),
+            repo_path: repo.to_string_lossy().into_owned(),
+            status: ValidationRunStatus::Pass,
+            started_unix_ms: 1,
+            finished_unix_ms: 2,
+            commands: vec![],
+            github_ci_used_as_evidence: false,
+            environment_policy: ValidationEnvironmentPolicySummary {
+                mode: EnvironmentPolicyMode::RecordOnly,
+                status: EnvironmentPolicyStatus::Pass,
+                checked: true,
+                command_results: vec![],
+                warnings_count: 0,
+                violations_count: 0,
+                redacted_variables_count: 0,
+            },
+            reason: None,
+        };
+
+        let admission = AdmissionVerdictManifest {
+            schema_version: 1,
+            admission_run_id: "admission-1".to_string(),
+            contract_path: "examples/ccl-admission-task-contract.json".to_string(),
+            contract_sha256: "abc".to_string(),
+            repo_path: repo.to_string_lossy().into_owned(),
+            validation_manifest_path: ".ccl/runs/validation-1/validation-run-manifest.json"
+                .to_string(),
+            scope_manifest_path: ".ccl/runs/scope-1/scope-check-manifest.json".to_string(),
+            ledger_path: "ledger/project-ledger.md".to_string(),
+            status: AdmissionStatus::Pass,
+            started_unix_ms: 1,
+            finished_unix_ms: 2,
+            github_ci_used_as_evidence: false,
+            evidence: AdmissionEvidenceSummary {
+                validation_status: "PASS".to_string(),
+                scope_status: "PASS".to_string(),
+                validation_github_ci_used_as_evidence: false,
+                scope_github_ci_used_as_evidence: false,
+                scope_violations_count: 0,
+                validation_commands_count: 0,
+                required_validation_failures_count: 0,
+                missing_command_result_artifacts_count: 0,
+                ledger_verification_status: Some("PASS".to_string()),
+                ledger_verification_manifest_path: Some(
+                    ".ccl/runs/ledger-1/ledger-verification-manifest.json".to_string(),
+                ),
+                ledger_exists: true,
+                ledger_update_required: true,
+                contract_sha256_matches_validation: true,
+                contract_sha256_matches_scope: true,
+            },
+            violations: vec![],
+            warnings: vec![],
+            decision_rule: "validation PASS + scope PASS + no hard violations".to_string(),
+            reason: None,
+        };
+
+        fs::write(
+            validation_dir.join("validation-run-manifest.json"),
+            serde_json::to_vec_pretty(&validation).unwrap(),
+        )
+        .unwrap();
+        fs::write(
+            admission_dir.join("admission-verdict.json"),
+            serde_json::to_vec_pretty(&admission).unwrap(),
+        )
+        .unwrap();
+
+        let loaded_validation =
+            load_validation_manifest(&repo, ".ccl/runs/validation-1/validation-run-manifest.json")
+                .expect("validation manifest should load");
+        let loaded_admission =
+            load_admission_manifest(&repo, ".ccl/runs/admission-1/admission-verdict.json")
+                .expect("admission should load");
+
+        assert_eq!(
+            loaded_validation.environment_policy.status,
+            EnvironmentPolicyStatus::Pass
         );
         assert_eq!(
             loaded_admission
