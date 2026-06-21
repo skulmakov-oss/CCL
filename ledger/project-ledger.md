@@ -109,6 +109,74 @@ Deleted:
 - expected files: crates/ccl-core/src/gate.rs, crates/ccl-cli/src/main.rs, ledger/project-ledger.md
 - forbidden files: .github/**, LICENSE, UI/Tauri files
 
+## 2026-06-21 — Dual License Metadata Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Governance
+- Task type: license metadata
+- Branch: chore/add-dual-license
+- PR: #10 — https://github.com/skulmakov-oss/CCL/pull/10
+- Base main HEAD: 6d9a52e0ccda76e6a475f0943136c4b4555c22d4
+
+### Basis
+
+- README.md
+- Cargo.toml
+- crates/ccl-core/Cargo.toml
+- crates/ccl-cli/Cargo.toml
+- ledger/project-ledger.md
+- docs/roadmap.md
+
+### Changed Files
+
+Created:
+- NOTICE
+- LICENSE-APACHE
+- LICENSE-MIT
+
+Edited:
+- Cargo.toml
+- README.md
+- crates/ccl-core/Cargo.toml
+- crates/ccl-cli/Cargo.toml
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- code behavior changed: NO
+- license files added: YES
+- NOTICE added: YES
+- README copyright block added: YES
+- Cargo license metadata added: YES
+- admission/capture/validation/scope logic changed: NO
+
+### Warnings
+
+- This is a governance/legal metadata PR only; it does not change CCL runtime behavior.
+
+### Next Gate
+
+- recommended next gate: Gate Orchestration Seed
+
 ## 2026-06-21 — Scope/Diff Policy Check Seed
 
 Status: PASS WITH WARNINGS
