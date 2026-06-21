@@ -133,6 +133,7 @@ Status: PASS WITH WARNINGS
 ### Changed Files
 
 Created:
+- NOTICE
 - LICENSE-APACHE
 - LICENSE-MIT
 
@@ -163,6 +164,8 @@ Deleted:
 
 - code behavior changed: NO
 - license files added: YES
+- NOTICE added: YES
+- README copyright block added: YES
 - Cargo license metadata added: YES
 - admission/capture/validation/scope logic changed: NO
 

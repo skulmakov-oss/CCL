@@ -283,3 +283,9 @@ CCL is dual-licensed under either of:
 - [MIT License](LICENSE-MIT)
 
 at your option.
+
+See [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) for details.
+
+## Copyright
+
+Copyright (c) 2026 Said Kulmakov.
