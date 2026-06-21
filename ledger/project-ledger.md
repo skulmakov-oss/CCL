@@ -1,5 +1,107 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Public CI Metadata Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Public Project Hygiene
+- Task type: CI metadata
+- Branch: ci/public-ci-metadata-seed
+- PR: #21
+- Base main HEAD: c1971b9e82d9adf075e74d8aa181c5bc7cfd31dc
+
+### Basis
+
+- README.md
+- docs/roadmap.md
+- docs/ci-metadata.md
+- .github/workflows/ci.yml
+- ledger/project-ledger.md
+- examples/ccl-admission-task-contract.json
+- scripts/demo.sh
+- scripts/demo.ps1
+- examples/ccl-env-policy-task-contract.json
+- examples/agent-docs-task-contract.json
+- examples/agent-test-fix-task-contract.json
+- examples/agent-refactor-task-contract.json
+- examples/agent-small-feature-task-contract.json
+
+### Changed Files
+
+Created:
+- .github/workflows/ci.yml
+- docs/ci-metadata.md
+
+Edited:
+- README.md
+- docs/roadmap.md
+- examples/ccl-admission-task-contract.json
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1 -VerboseEvidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### CI Metadata Proof
+
+- GitHub Actions workflow added: YES
+- CI badge added: YES
+- CI metadata doc added: YES
+- admission contract updated for workflow metadata: YES
+- Rust checks included: YES
+- contract checks included: YES
+- CCL gate smoke check included: YES
+- bash demo included: YES
+- GitHub CI treated as admission evidence: NO
+- local CCL gate remains authority: YES
+
+### Boundary Conclusion
+
+- runtime behavior changed: NO
+- CCL admission authority changed: NO
+- GitHub CI added as metadata: YES
+- GitHub CI used as evidence: NO
+- local CCL gate remains required: YES
+
+### Warnings
+
+- This PR adds public CI metadata only.
+- GitHub CI is not final CCL evidence.
+- CI artifacts are not uploaded as admission artifacts.
+- Branch protection is not configured in this PR.
+- Release packaging is still future work.
+
+### Next Gate
+
+- recommended next gate: Release Packaging / Install Notes Seed
+- reason: after public CI metadata exists, the project should document installation and repeatable local use.
+
 ## 2026-06-22 — Codex Dogfood Trial Seed
 
 Status: PASS WITH WARNINGS
