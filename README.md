@@ -185,6 +185,9 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/roadmap.md`](docs/roadmap.md) — conservative MVP roadmap.
 - [`docs/reviews/external-review-intake.md`](docs/reviews/external-review-intake.md) — external review intake and disposition notes.
 - [`docs/security/threat-model-notes.md`](docs/security/threat-model-notes.md) — current threat model notes and hardening backlog.
+- [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
+- [`scripts/demo.ps1`](scripts/demo.ps1) — repeatable PowerShell demo script.
+- [`scripts/demo.sh`](scripts/demo.sh) — repeatable Bash demo script for Git Bash, Linux, and macOS.
 - [`ledger/project-ledger.md`](ledger/project-ledger.md) — active project ledger.
 - [`examples/semantic-task-contract.json`](examples/semantic-task-contract.json) — initial Semantic task contract example.
 - [`examples/ccl-validation-task-contract.json`](examples/ccl-validation-task-contract.json) — validation runner example contract.
@@ -212,11 +215,12 @@ Current implemented direction:
 - gate orchestration.
 - ledger semantic verification.
 - external review intake / threat model notes.
+- demo script.
 
 Next implementation direction:
 
 ```text
-Demo Script Seed
+Environment Allowlist Policy Design Seed
 ```
 
 Current capture layer already supports:
@@ -281,6 +285,24 @@ Admission verdict from existing evidence:
 ```powershell
 cargo run -p ccl-cli -- admission verdict --contract examples/ccl-admission-task-contract.json --repo . --validation-manifest <validation-manifest> --scope-manifest <scope-manifest>
 ```
+
+Demo:
+
+### Windows PowerShell
+
+```powershell
+.\scripts\demo.ps1
+.\scripts\demo.ps1 -VerboseEvidence
+```
+
+### Git Bash / Linux / macOS
+
+```bash
+bash scripts/demo.sh
+bash scripts/demo.sh --verbose-evidence
+```
+
+See [`docs/demo.md`](docs/demo.md).
 
 ---
 

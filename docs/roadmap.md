@@ -91,9 +91,11 @@ Expected work:
 - manifest signing design;
 - process isolation hardening plan.
 
+Demo Script Seed records a repeatable local demonstration of the current CCL gate pipeline without changing runtime behavior. The seed includes Windows PowerShell and Bash entrypoints for the same deterministic sequence.
+
 Next implementation direction:
 
-Demo Script Seed
+Environment Allowlist Policy Design Seed
 
 ## Phase 4 — Tauri Desktop Shell
 
