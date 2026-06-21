@@ -1,5 +1,107 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Codex Test-Fix Contract Trial Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: Test Fix
+- Task type: test_gate
+- Branch: dogfood/codex-test-fix-contract-trial
+- PR: #23
+- Base main HEAD: a82c38c09b369c945724ebb15f30b829bfe51f63
+- Contract used: examples/agent-test-fix-task-contract.json
+
+### Objective
+
+- Objective: Fix a focused failing test or test helper without broad refactor.
+
+### Basis
+
+- examples/agent-test-fix-task-contract.json
+- crates/ccl-core/src/task_contract.rs
+- crates/ccl-core/src/environment.rs
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/admission.rs
+- crates/ccl-core/src/validation_runner.rs
+- crates/ccl-core/src/capture.rs
+- crates/ccl-core/src/evidence.rs
+- crates/ccl-cli/src/main.rs
+- ledger/project-ledger.md
+
+### Changed Files
+
+Created:
+- none
+
+Edited:
+- crates/ccl-core/src/environment.rs
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/agent-test-fix-task-contract.json --repo .`: PASS WITH WARNINGS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Dogfood Proof
+
+- Codex used as executor: YES
+- test-fix contract used: YES
+- local CCL gate used: YES
+- allowed paths respected: YES
+- forbidden paths untouched: YES
+- regression test added: YES
+- runtime fix added: NO
+- agent report used as evidence: NO
+- GitHub CI used as evidence: NO
+
+### Validation runner proof
+
+- contract path: examples/agent-test-fix-task-contract.json
+- command: cargo run -p ccl-cli -- validate run --contract examples/agent-test-fix-task-contract.json --repo .
+- status: PASS WITH WARNINGS
+- validation manifest path: .ccl/runs/validation-.../validation-run-manifest.json
+- environment policy: warn
+- warnings count: non-zero
+- violations count: 0
+
+### Test Fix Proof
+
+- Validation runner proof: YES
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- CCL admission authority changed: NO
+- agent testimony used as evidence: NO
+- examples used as evidence: NO
+- local CCL evidence used: YES
+- runtime behavior changed: NO
+
+### Warnings
+
+- This is a controlled dogfood trial.
+- Codex output is testimony only.
+- The trial does not implement direct agent integration.
+- GitHub CI remains metadata, not admission evidence.
+
+### Next Gate
+
+- recommended next gate: Release Artifact Design Seed
+- reason: after docs-only and test-fix dogfood trials, CCL can start designing official release artifact generation and evidence requirements.
+
 ## 2026-06-22 — Release Packaging / Install Notes Seed
 
 Status: PASS WITH WARNINGS

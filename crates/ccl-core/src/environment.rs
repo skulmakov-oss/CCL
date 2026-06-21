@@ -489,6 +489,22 @@ mod tests {
     }
 
     #[test]
+    fn deny_prefix_wins_over_allow_exact() {
+        let policy = EnvironmentPolicy {
+            mode: EnvironmentPolicyMode::Enforce,
+            allow: vec!["CARGO_TERM_COLOR".to_string()],
+            deny_prefixes: vec!["CARGO_TERM_".to_string()],
+            ..EnvironmentPolicy::default()
+        };
+        let result = policy.evaluate(&env(&[("CARGO_TERM_COLOR", "always")]));
+        assert_eq!(result.status, EnvironmentPolicyStatus::Fail);
+        assert_eq!(
+            result.variables[0].match_rule,
+            EnvironmentMatchRule::DenyPrefix
+        );
+    }
+
+    #[test]
     fn secret_like_variable_is_redacted() {
         let policy = EnvironmentPolicy {
             mode: EnvironmentPolicyMode::Warn,
