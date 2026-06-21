@@ -14,7 +14,7 @@
     "crates/ccl-cli/**",
     "ci/**",
     "docs/**",
-    ".github/workflows/**",
+    ".github/workflows/ci.yml",
     "examples/**",
     "ledger/**"
   ],
