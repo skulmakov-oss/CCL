@@ -1,3 +1,4 @@
+pub mod admission;
 pub mod capture;
 pub mod evidence;
 pub mod preflight;

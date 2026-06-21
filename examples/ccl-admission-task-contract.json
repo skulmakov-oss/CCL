@@ -1,0 +1,74 @@
+{
+  "project": "CCL",
+  "workstream": "Admission",
+  "task_type": "guard_gate",
+  "objective": "Compute an admission verdict from existing validation and scope evidence.",
+  "required_context": {
+    "dna": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "README.md",
+    "crates/ccl-core/**",
+    "crates/ccl-cli/**",
+    "ci/**",
+    "docs/**",
+    "examples/**",
+    "ledger/**"
+  ],
+  "forbidden_paths": [
+    ".github/**"
+  ],
+  "required_validation": [
+    "cargo fmt",
+    "cargo test",
+    "local admission guard",
+    "scope check"
+  ],
+  "validation": {
+    "commands": [
+      {
+        "id": "cargo-fmt",
+        "program": "cargo",
+        "args": [
+          "fmt",
+          "--check"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-test",
+        "program": "cargo",
+        "args": [
+          "test"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "local-admission-guard",
+        "program": "powershell.exe",
+        "args": [
+          "-File",
+          ".\\ci\\admission.ps1",
+          "--full"
+        ],
+        "required": true,
+        "wall_timeout_seconds": 300
+      }
+    ]
+  },
+  "scope_limits": {
+    "max_changed_files": 25,
+    "max_diff_lines": 3000
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "Validation and scope evidence are clean.",
+    "pass_with_warnings": "Admission passed with non-blocking warnings.",
+    "fail": "Admission evidence failed."
+  }
+}
