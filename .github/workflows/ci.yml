@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  rust-checks:
+    name: Rust checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt,clippy
+
+      - name: Rustup info
+        run: rustup show
+
+      - name: Format
+        run: cargo fmt --check
+
+      - name: Test
+        run: cargo test
+
+      - name: Version
+        run: cargo run -p ccl-cli -- --version
+
+  contract-checks:
+    name: Contract checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Contract checks
+        run: |
+          cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json
+          cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json
+
+      - name: Preflight
+        run: cargo run -p ccl-cli -- preflight --repo .
+
+      - name: Gate smoke check
+        run: cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
+
+  demo-checks:
+    name: Demo checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Bash demo
+        run: |
+          bash scripts/demo.sh
+          bash scripts/demo.sh --verbose-evidence
+
+      - name: Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings

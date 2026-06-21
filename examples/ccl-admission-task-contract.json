@@ -14,11 +14,12 @@
     "crates/ccl-cli/**",
     "ci/**",
     "docs/**",
+    ".github/workflows/ci.yml",
     "examples/**",
     "ledger/**"
   ],
   "forbidden_paths": [
-    ".github/**"
+    ".github/actions/**"
   ],
   "required_validation": [
     "cargo fmt",

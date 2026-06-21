@@ -4,6 +4,8 @@
   <p align="center"><em>Deterministic governance for controlled AI-agent software engineering.</em></p>
 </p>
 
+[![CI](https://github.com/skulmakov-oss/CCL/actions/workflows/ci.yml/badge.svg)](https://github.com/skulmakov-oss/CCL/actions/workflows/ci.yml)
+
 ---
 
 # CCL — Cerebral Control Layer
@@ -187,6 +189,8 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/security/threat-model-notes.md`](docs/security/threat-model-notes.md) — current threat model notes and hardening backlog.
 - [`docs/security/environment-allowlist-policy.md`](docs/security/environment-allowlist-policy.md) — design seed for future environment allowlist enforcement.
 - [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.md) — guide to realistic AI-agent task contract examples.
+- [`docs/ci-metadata.md`](docs/ci-metadata.md) — explains why GitHub CI is metadata, not CCL admission evidence.
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — public CI metadata workflow.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
 - [`scripts/demo.ps1`](scripts/demo.ps1) — repeatable PowerShell demo script.
 - [`scripts/demo.sh`](scripts/demo.sh) — repeatable Bash demo script for Git Bash, Linux, and macOS.
@@ -237,6 +241,18 @@ Real AI-Agent Task Contract Examples Seed
 CCL includes example task contracts for common AI-agent workflows. These examples are templates, not evidence.
 
 See [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.md).
+
+## Public CI Metadata
+
+CCL uses GitHub Actions as public project metadata only.
+
+A green GitHub check does not replace local CCL evidence.
+
+```powershell
+cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
+```
+
+See [`docs/ci-metadata.md`](docs/ci-metadata.md).
 
 Current capture layer already supports:
 
