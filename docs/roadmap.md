@@ -76,6 +76,8 @@ Expected behavior:
 - compare ledger claims with captured evidence;
 - reject completion when ledger requirements are missing.
 
+Scope/diff policy checking is the prerequisite fence before ledger enforcement can trust a working tree as admissible.
+
 ## Phase 4 — Tauri Desktop Shell
 
 Goal: provide a practical desktop interface over the deterministic core.
