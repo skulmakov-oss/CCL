@@ -106,9 +106,11 @@ Public CI Metadata Compatibility Fix keeps that workflow green on Linux by using
 
 Release Packaging / Install Notes Seed documents source installation, local verification, demo execution, and future release packaging boundaries.
 
+Release Artifact Design Seed defines future distributable artifacts, checksums, release manifests, platform matrix, and evidence requirements without publishing artifacts.
+
 Next implementation direction:
 
-Codex Test-Fix Contract Trial Seed
+Version / Tag Policy Seed
 
 GitHub CI is public metadata, not CCL admission evidence.
 

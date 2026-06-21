@@ -105,6 +105,105 @@ Deleted:
 - recommended next gate: Release Artifact Design Seed
 - reason: after public CI is visibly green, release artifact design can continue without carrying red metadata noise.
 
+## 2026-06-22 — Release Artifact Design Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: release artifact design
+- Branch: docs/release-artifact-design
+- PR: #24
+- Base main HEAD: 7111f236bdce3dd8d1a783fc0c10ed90cd9167db
+
+### Basis
+
+- README.md
+- docs/install.md
+- docs/ci-metadata.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+### Changed Files
+
+Created:
+- docs/release-artifacts.md
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo . --verbose`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json bash scripts/demo.sh`: PASS
+- `CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json bash scripts/demo.sh --verbose-evidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Release Artifact Design Proof
+
+- release artifact design doc added: YES
+- candidate artifact types defined: YES
+- artifact trust model defined: YES
+- checksum design defined: YES
+- release manifest future shape proposed: YES
+- platform matrix defined: YES
+- GitHub CI boundary documented: YES
+- release ledger requirements defined: YES
+- actual release artifacts created: NO
+- release automation added: NO
+- runtime behavior changed: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- official binaries published: NO
+- crates.io publishing added: NO
+- release artifacts generated: NO
+- release automation added: NO
+- local CCL release evidence required: YES
+- GitHub CI remains metadata: YES
+
+### Warnings
+
+- This PR is release design documentation only.
+- No official release artifacts are created.
+- No checksums are generated.
+- No signing is implemented.
+- No release automation is added.
+- GitHub CI remains metadata, not evidence.
+
+### Next Gate
+
+- recommended next gate: Version / Tag Policy Seed
+- reason: before artifact generation can exist, CCL needs deterministic version and tag rules.
+
 ## 2026-06-22 — Codex Test-Fix Contract Trial Seed
 
 Status: PASS WITH WARNINGS
