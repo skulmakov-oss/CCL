@@ -1,0 +1,7 @@
+# Keep shell scripts portable for Git Bash, Linux, and macOS.
+*.sh text eol=lf
+scripts/*.sh text eol=lf
+
+# PowerShell scripts are Windows-first but should remain text-normalized.
+*.ps1 text
+scripts/*.ps1 text

@@ -932,3 +932,83 @@ Deleted:
 
 - recommended next gate: Evidence Manifest + Contract-bound Validation Runner
 - reason: command capture is now available; next step is to bind validation to manifest-backed admission logic
+
+## 2026-06-21 — Bash Demo Line Ending Normalization
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Developer Experience
+- Task type: repository hygiene
+- Branch: chore/normalize-bash-demo-line-endings
+- PR: #<number after created>
+- Base main HEAD: 8af8ce92bce184d3deb1a17bb08d496569b1b214
+
+### Basis
+
+- scripts/demo.sh
+- scripts/demo.ps1
+- docs/demo.md
+- ledger/project-ledger.md
+
+### Changed Files
+
+Created:
+- .gitattributes
+
+Edited:
+- scripts/demo.sh
+- ledger/project-ledger.md
+- .gitattributes
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1 -VerboseEvidence`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Demo Line Ending Proof
+
+- scripts/demo.sh normalized to LF: YES
+- .gitattributes added or updated: YES
+- Bash demo default mode passes: YES
+- Bash demo verbose mode passes: YES
+- PowerShell demo still passes: YES
+- runtime behavior changed: NO
+- CCL admission authority changed: NO
+
+### Boundary Conclusion
+
+- code behavior changed: NO
+- runtime behavior changed: NO
+- demo portability improved: YES
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- This PR is repository hygiene only.
+- It does not change CCL runtime behavior.
+- It exists to unblock PR #15 validation.
+
+### Next Gate
+
+- recommended next gate: return PR #15 from Draft after rebasing onto this fix
+- reason: Environment Allowlist Policy Design Seed was blocked only by Bash demo line-ending validation failure.
