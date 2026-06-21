@@ -190,6 +190,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/security/environment-allowlist-policy.md`](docs/security/environment-allowlist-policy.md) — design seed for future environment allowlist enforcement.
 - [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.md) — guide to realistic AI-agent task contract examples.
 - [`docs/ci-metadata.md`](docs/ci-metadata.md) — explains why GitHub CI is metadata, not CCL admission evidence.
+- [`docs/install.md`](docs/install.md) — source install, build, verification, and release-readiness notes.
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — public CI metadata workflow.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
 - [`scripts/demo.ps1`](scripts/demo.ps1) — repeatable PowerShell demo script.
@@ -253,6 +254,19 @@ cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract
 ```
 
 See [`docs/ci-metadata.md`](docs/ci-metadata.md).
+
+## Install from Source
+
+CCL currently installs from source.
+
+```powershell
+git clone https://github.com/skulmakov-oss/CCL.git
+cd CCL
+cargo build --release
+cargo run -p ccl-cli -- --version
+```
+
+See [`docs/install.md`](docs/install.md).
 
 Current capture layer already supports:
 

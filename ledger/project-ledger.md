@@ -1,5 +1,106 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Release Packaging / Install Notes Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Developer Experience / Release Readiness
+- Task type: install documentation
+- Branch: docs/release-packaging-install-notes
+- PR: #22
+- Base main HEAD: 940cfd13933afe102e01eaaaab8b3d19d6670d47
+
+### Basis
+
+- README.md
+- docs/roadmap.md
+- docs/demo.md
+- docs/ci-metadata.md
+- scripts/demo.ps1
+- scripts/demo.sh
+- Cargo.toml
+- crates/ccl-cli/Cargo.toml
+- crates/ccl-core/Cargo.toml
+- ledger/project-ledger.md
+
+### Changed Files
+
+Created:
+- docs/install.md
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo . --verbose`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1 -VerboseEvidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Install Notes Proof
+
+- install doc added: YES
+- source build documented: YES
+- release build documented: YES
+- CLI verification documented: YES
+- contract checks documented: YES
+- local gate verification documented: YES
+- demo scripts documented: YES
+- public CI boundary documented: YES
+- future release checklist added: YES
+- actual release artifacts created: NO
+- runtime behavior changed: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- runtime behavior changed: NO
+- official binaries published: NO
+- crates.io publishing added: NO
+- release automation added: NO
+- install documentation added: YES
+- local CCL gate remains authority: YES
+
+### Warnings
+
+- This PR adds install and release-readiness documentation only.
+- No official binaries are published.
+- No crates.io release is created.
+- Release automation remains future work.
+- GitHub CI remains metadata, not admission evidence.
+
+### Next Gate
+
+- recommended next gate: Codex Test-Fix Contract Trial Seed
+- reason: after install notes exist, CCL should run a second dogfood trial on a constrained test-fix contract before designing official release artifacts.
+
 ## 2026-06-22 — Public CI Metadata Seed
 
 Status: PASS WITH WARNINGS
