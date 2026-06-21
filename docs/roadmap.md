@@ -103,9 +103,11 @@ Real AI-Agent Task Contract Examples Seed provides realistic example contracts f
 
 Public CI Metadata Seed adds GitHub Actions as public project hygiene while preserving local CCL gate as admission authority.
 
+Release Packaging / Install Notes Seed documents source installation, local verification, demo execution, and future release packaging boundaries.
+
 Next implementation direction:
 
-Release Packaging / Install Notes Seed
+Codex Test-Fix Contract Trial Seed
 
 GitHub CI is public metadata, not CCL admission evidence.
 
