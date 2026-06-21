@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,6 +33,44 @@ pub struct Verdict {
     pub status: VerdictStatus,
     pub errors: Vec<String>,
     pub warnings: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum AdmissionStatus {
+    Pass,
+    PassWithWarnings,
+    Fail,
+    ContractFail,
+    InternalError,
+}
+
+impl fmt::Display for AdmissionStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AdmissionStatus::Pass => write!(f, "PASS"),
+            AdmissionStatus::PassWithWarnings => write!(f, "PASS WITH WARNINGS"),
+            AdmissionStatus::Fail => write!(f, "FAIL"),
+            AdmissionStatus::ContractFail => write!(f, "CONTRACT_FAIL"),
+            AdmissionStatus::InternalError => write!(f, "INTERNAL_ERROR"),
+        }
+    }
+}
+
+impl AdmissionStatus {
+    pub fn is_pass_like(&self) -> bool {
+        matches!(
+            self,
+            AdmissionStatus::Pass | AdmissionStatus::PassWithWarnings
+        )
+    }
+
+    pub fn is_failure(&self) -> bool {
+        matches!(
+            self,
+            AdmissionStatus::Fail | AdmissionStatus::ContractFail | AdmissionStatus::InternalError
+        )
+    }
 }
 
 #[cfg(test)]

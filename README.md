@@ -187,6 +187,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`examples/semantic-task-contract.json`](examples/semantic-task-contract.json) — initial Semantic task contract example.
 - [`examples/ccl-validation-task-contract.json`](examples/ccl-validation-task-contract.json) — validation runner example contract.
 - [`examples/ccl-scope-task-contract.json`](examples/ccl-scope-task-contract.json) — scope/diff policy check example contract.
+- [`examples/ccl-admission-task-contract.json`](examples/ccl-admission-task-contract.json) — admission verdict example contract.
 
 ---
 
@@ -205,11 +206,12 @@ Current implemented direction:
 - project ledger discipline;
 - contract-bound validation runner.
 - scope/diff policy check.
+- admission verdict from evidence.
 
 Next implementation direction:
 
 ```text
-Admission Verdict From Evidence Seed
+Gate Orchestration Seed
 ```
 
 Current capture layer already supports:

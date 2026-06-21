@@ -1,10 +1,11 @@
+use ccl_core::admission;
 use ccl_core::capture::{capture_command, CaptureError};
 use ccl_core::evidence::{CapturePolicy, CaptureRequest, CommandSpec};
 use ccl_core::preflight;
 use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
 use ccl_core::validation_runner::{self, ValidationRunStatus};
-use ccl_core::verdict::VerdictStatus;
+use ccl_core::verdict::{AdmissionStatus, VerdictStatus};
 use clap::{Parser, Subcommand};
 use std::path::{Path, PathBuf};
 
@@ -56,6 +57,11 @@ enum Commands {
         #[command(subcommand)]
         action: ScopeCommands,
     },
+    /// Compute admission verdict from existing evidence
+    Admission {
+        #[command(subcommand)]
+        action: AdmissionCommands,
+    },
 }
 
 #[derive(Subcommand)]
@@ -80,6 +86,22 @@ enum ScopeCommands {
         contract: PathBuf,
         #[arg(long)]
         repo: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum AdmissionCommands {
+    Verdict {
+        #[arg(long)]
+        contract: PathBuf,
+        #[arg(long)]
+        repo: PathBuf,
+        #[arg(long)]
+        validation_manifest: PathBuf,
+        #[arg(long)]
+        scope_manifest: PathBuf,
+        #[arg(long, default_value = "ledger/project-ledger.md")]
+        ledger: PathBuf,
     },
 }
 
@@ -240,6 +262,35 @@ fn main() {
                 }
             },
         },
+        Some(Commands::Admission { action }) => match action {
+            AdmissionCommands::Verdict {
+                contract,
+                repo,
+                validation_manifest: _validation_manifest,
+                scope_manifest: _scope_manifest,
+                ledger: _ledger,
+            } => match admission::run_admission_verdict(admission::AdmissionVerdictRequest {
+                contract_path: contract.clone(),
+                repo: repo.clone(),
+                validation_manifest_path: _validation_manifest.clone(),
+                scope_manifest_path: _scope_manifest.clone(),
+                ledger_path: _ledger.clone(),
+            }) {
+                Ok(outcome) => {
+                    print_admission_verdict(
+                        &outcome.manifest,
+                        contract,
+                        repo,
+                        &outcome.manifest_path,
+                    );
+                    std::process::exit(admission_exit_code(&outcome.manifest.status));
+                }
+                Err(err) => {
+                    eprintln!("Admission verdict error: {}", err);
+                    std::process::exit(40);
+                }
+            },
+        },
         None => {}
     }
 }
@@ -338,5 +389,64 @@ fn scope_exit_code(status: &ScopeCheckStatus) -> i32 {
         ScopeCheckStatus::PassWithWarnings => 10,
         ScopeCheckStatus::Fail => 20,
         ScopeCheckStatus::ContractFail => 30,
+    }
+}
+
+fn print_admission_verdict(
+    manifest: &admission::AdmissionVerdictManifest,
+    contract: &Path,
+    repo: &Path,
+    manifest_path: &str,
+) {
+    println!("CCL admission verdict");
+    println!("Contract: {}", contract.display());
+    println!("Repo: {}", repo.display());
+    println!("Status: {}", manifest.status);
+    println!();
+    println!("Evidence:");
+    println!("- validation: {}", manifest.evidence.validation_status);
+    println!("- scope: {}", manifest.evidence.scope_status);
+    println!(
+        "- ledger exists: {}",
+        if manifest.evidence.ledger_exists {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!(
+        "- GitHub CI used as evidence: {}",
+        if manifest.github_ci_used_as_evidence {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!();
+    if !manifest.warnings.is_empty() {
+        println!("Warnings:");
+        for warning in &manifest.warnings {
+            println!("- {}: {}", warning.kind, warning.reason);
+        }
+        println!();
+    }
+    if !manifest.violations.is_empty() {
+        println!("Violations:");
+        for violation in &manifest.violations {
+            println!("- {}: {}", violation.kind, violation.reason);
+        }
+        println!();
+    }
+    println!("Manifest:");
+    println!("{}", manifest_path);
+}
+
+fn admission_exit_code(status: &AdmissionStatus) -> i32 {
+    match status {
+        AdmissionStatus::Pass => 0,
+        AdmissionStatus::PassWithWarnings => 10,
+        AdmissionStatus::Fail => 20,
+        AdmissionStatus::ContractFail => 30,
+        AdmissionStatus::InternalError => 40,
     }
 }
