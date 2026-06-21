@@ -118,7 +118,7 @@ Status: PASS WITH WARNINGS
 - Workstream: CCL Governance
 - Task type: license metadata
 - Branch: chore/add-dual-license
-- PR: pending
+- PR: #10 — https://github.com/skulmakov-oss/CCL/pull/10
 - Base main HEAD: 6d9a52e0ccda76e6a475f0943136c4b4555c22d4
 
 ### Basis
@@ -156,7 +156,7 @@ Deleted:
 - `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
 - `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
 - `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
-- `cargo clippy --all-targets --all-features -- -D warnings`: pending
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
 - GitHub CI used as evidence: NO
 
 ### Boundary Conclusion
