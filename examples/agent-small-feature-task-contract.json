@@ -1,0 +1,115 @@
+{
+  "project": "CCL",
+  "workstream": "Small Feature",
+  "task_type": "source_pr",
+  "objective": "Add a narrow CLI or reporting feature while keeping existing gate behavior stable.",
+  "required_context": {
+    "dna": true,
+    "agent_skills": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "crates/ccl-cli/src/main.rs",
+    "crates/ccl-core/src/**",
+    "README.md",
+    "docs/**",
+    "ledger/project-ledger.md"
+  ],
+  "forbidden_paths": [
+    ".github/**",
+    "ci/**",
+    "scripts/**",
+    "LICENSE-*",
+    "NOTICE",
+    "Cargo.toml",
+    "Cargo.lock"
+  ],
+  "required_validation": [
+    "cargo fmt --check",
+    "cargo test",
+    "cargo clippy --all-targets --all-features -- -D warnings",
+    "cargo run -p ccl-cli -- --version",
+    "cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo ."
+  ],
+  "validation": {
+    "commands": [
+      {
+        "id": "cargo-fmt",
+        "program": "cargo",
+        "args": ["fmt", "--check"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-test",
+        "program": "cargo",
+        "args": ["test"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-clippy",
+        "program": "cargo",
+        "args": ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "ccl-version",
+        "program": "cargo",
+        "args": ["run", "-p", "ccl-cli", "--", "--version"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "gate-run",
+        "program": "cargo",
+        "args": ["run", "-p", "ccl-cli", "--", "gate", "run", "--contract", "examples/ccl-admission-task-contract.json", "--repo", "."],
+        "required": true,
+        "wall_timeout_seconds": 300
+      }
+    ]
+  },
+  "scope_limits": {
+    "max_changed_files": 12,
+    "max_diff_lines": 800
+  },
+  "environment_policy": {
+    "mode": "warn",
+    "allow": [
+      "PATH",
+      "SystemRoot",
+      "WINDIR",
+      "HOME",
+      "USERPROFILE",
+      "TMP",
+      "TEMP",
+      "NO_COLOR",
+      "TERM"
+    ],
+    "deny": [
+      "CCL_TEST_FORBIDDEN_ENV"
+    ],
+    "allow_prefixes": [
+      "CARGO_TERM_"
+    ],
+    "deny_prefixes": [
+      "CCL_TEST_DENY_"
+    ],
+    "redact_patterns": [
+      "TOKEN",
+      "SECRET",
+      "PASSWORD",
+      "KEY"
+    ],
+    "unknown": "warn"
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "Narrow feature changes stay inside scope and local checks pass.",
+    "pass_with_warnings": "Narrow feature changes pass with non-blocking warnings.",
+    "fail": "Narrow feature changes violated scope or required validation."
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "project": "CCL",
+  "workstream": "Refactor",
+  "task_type": "source_pr",
+  "objective": "Refactor a small CCL internal module while preserving behavior.",
+  "required_context": {
+    "dna": true,
+    "agent_skills": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "crates/ccl-core/src/**",
+    "crates/ccl-cli/src/main.rs",
+    "ledger/project-ledger.md"
+  ],
+  "forbidden_paths": [
+    "Cargo.toml",
+    "Cargo.lock",
+    ".github/**",
+    "ci/**",
+    "scripts/**",
+    "LICENSE-*",
+    "NOTICE",
+    "docs/security/environment-allowlist-policy.md",
+    "CCL_DNA.md"
+  ],
+  "required_validation": [
+    "cargo fmt --check",
+    "cargo test",
+    "cargo clippy --all-targets --all-features -- -D warnings",
+    "cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo ."
+  ],
+  "validation": {
+    "commands": [
+      {
+        "id": "cargo-fmt",
+        "program": "cargo",
+        "args": ["fmt", "--check"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-test",
+        "program": "cargo",
+        "args": ["test"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-clippy",
+        "program": "cargo",
+        "args": ["clippy", "--all-targets", "--all-features", "--", "-D", "warnings"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "gate-run",
+        "program": "cargo",
+        "args": ["run", "-p", "ccl-cli", "--", "gate", "run", "--contract", "examples/ccl-admission-task-contract.json", "--repo", "."],
+        "required": true,
+        "wall_timeout_seconds": 300
+      }
+    ]
+  },
+  "scope_limits": {
+    "max_changed_files": 10,
+    "max_diff_lines": 600
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "Behavior-preserving refactor stays inside scope and local checks pass.",
+    "pass_with_warnings": "Behavior-preserving refactor passes with non-blocking warnings.",
+    "fail": "Behavior-preserving refactor violated scope or required validation."
+  }
+}
