@@ -1,5 +1,88 @@
 # CCL Project Ledger
 
+## 2026-06-21 — Environment Allowlist Policy Design Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Security / Governance
+- Task type: policy design
+- Branch: docs/environment-allowlist-policy-design
+- PR: #15
+- Base main HEAD: 8af8ce92bce184d3deb1a17bb08d496569b1b214
+
+### Basis
+
+- README.md
+- docs/security/threat-model-notes.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- crates/ccl-core/src/capture.rs
+- crates/ccl-core/src/evidence.rs
+- examples/ccl-admission-task-contract.json
+
+### Changed Files
+
+Created:
+- docs/security/environment-allowlist-policy.md
+
+Edited:
+- README.md
+- docs/security/threat-model-notes.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1`: PASS
+- `bash scripts/demo.sh`: FAIL (CRLF line endings in this shell)
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Policy Design Proof
+
+- environment allowlist policy doc added: YES
+- policy modes defined: YES
+- env variable classes defined: YES
+- denylist precedence defined: YES
+- future Task Contract shape proposed: YES
+- future capture manifest shape proposed: YES
+- future admission semantics defined: YES
+- enforcement implemented: NO
+- runtime behavior changed: NO
+
+### Boundary Conclusion
+
+- code behavior changed: NO
+- CCL admission authority changed: NO
+- current capture behavior changed: NO
+- policy design added: YES
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- This PR is design-only.
+- Environment allowlist enforcement is not implemented yet.
+- Current env snapshot behavior remains record-only.
+- Bash demo exact command is blocked here by CRLF line endings; the policy design itself is unaffected.
+
+### Next Gate
+
+- recommended next gate: Environment Allowlist Enforcement Seed
+- reason: policy design should be followed by minimal record/warn enforcement.
+
+# CCL Project Ledger
+
 ## 2026-06-21 — Demo Script Seed
 
 Status: PASS WITH WARNINGS

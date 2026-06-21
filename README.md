@@ -185,6 +185,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/roadmap.md`](docs/roadmap.md) — conservative MVP roadmap.
 - [`docs/reviews/external-review-intake.md`](docs/reviews/external-review-intake.md) — external review intake and disposition notes.
 - [`docs/security/threat-model-notes.md`](docs/security/threat-model-notes.md) — current threat model notes and hardening backlog.
+- [`docs/security/environment-allowlist-policy.md`](docs/security/environment-allowlist-policy.md) — design seed for future environment allowlist enforcement.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
 - [`scripts/demo.ps1`](scripts/demo.ps1) — repeatable PowerShell demo script.
 - [`scripts/demo.sh`](scripts/demo.sh) — repeatable Bash demo script for Git Bash, Linux, and macOS.

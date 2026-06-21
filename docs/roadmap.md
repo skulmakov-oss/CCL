@@ -91,11 +91,13 @@ Expected work:
 - manifest signing design;
 - process isolation hardening plan.
 
+Environment Allowlist Policy Design Seed records the future policy model for environment classification, allowlists, denylists, redaction, and admission semantics.
+
 Demo Script Seed records a repeatable local demonstration of the current CCL gate pipeline without changing runtime behavior. The seed includes Windows PowerShell and Bash entrypoints for the same deterministic sequence.
 
 Next implementation direction:
 
-Environment Allowlist Policy Design Seed
+Environment Allowlist Enforcement Seed
 
 ## Phase 4 — Tauri Desktop Shell
 
