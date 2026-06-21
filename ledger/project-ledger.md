@@ -9,7 +9,7 @@ Status: PASS WITH WARNINGS
 - Workstream: CCL Phase 1
 - Task type: scope policy
 - Branch: feat/scope-diff-policy-check-seed
-- PR: not created yet
+- PR: #8 — https://github.com/skulmakov-oss/CCL/pull/8
 - Base main HEAD: 94f06df5fa3041f6d31f58791ce1e3c12eba7b4a
 
 ### Basis
