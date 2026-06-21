@@ -183,6 +183,8 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/agent-report-format.md`](docs/agent-report-format.md) — required execution report structure.
 - [`docs/project-ledger.md`](docs/project-ledger.md) — project ledger rules and entry template.
 - [`docs/roadmap.md`](docs/roadmap.md) — conservative MVP roadmap.
+- [`docs/reviews/external-review-intake.md`](docs/reviews/external-review-intake.md) — external review intake and disposition notes.
+- [`docs/security/threat-model-notes.md`](docs/security/threat-model-notes.md) — current threat model notes and hardening backlog.
 - [`ledger/project-ledger.md`](ledger/project-ledger.md) — active project ledger.
 - [`examples/semantic-task-contract.json`](examples/semantic-task-contract.json) — initial Semantic task contract example.
 - [`examples/ccl-validation-task-contract.json`](examples/ccl-validation-task-contract.json) — validation runner example contract.
@@ -209,11 +211,12 @@ Current implemented direction:
 - admission verdict from evidence.
 - gate orchestration.
 - ledger semantic verification.
+- external review intake / threat model notes.
 
 Next implementation direction:
 
 ```text
-External Review Intake / Threat Model Notes Seed
+Demo Script Seed
 ```
 
 Current capture layer already supports:
