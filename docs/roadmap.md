@@ -99,9 +99,13 @@ Demo Script Seed records a repeatable local demonstration of the current CCL gat
 
 Gate Run UX Summary Seed improves the human-readable `ccl gate run` output with layer statuses, environment policy status, counts, and artifact paths without changing admission authority.
 
+Real AI-Agent Task Contract Examples Seed provides realistic example contracts for docs-only, test-fix, refactor, and small feature agent workflows.
+
 Next implementation direction:
 
-Real AI-Agent Task Contract Examples Seed
+Public CI Metadata Seed
+
+GitHub CI is public metadata, not CCL admission evidence.
 
 ## Phase 4 — Tauri Desktop Shell
 

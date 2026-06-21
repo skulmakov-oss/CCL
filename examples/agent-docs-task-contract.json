@@ -1,0 +1,73 @@
+{
+  "project": "CCL",
+  "workstream": "Docs",
+  "task_type": "docs_gate",
+  "objective": "Improve or clarify repository documentation without changing runtime behavior.",
+  "required_context": {
+    "dna": true,
+    "agent_skills": true,
+    "latest_prs": 10,
+    "project_ledger": true
+  },
+  "allowed_paths": [
+    "README.md",
+    "docs/**",
+    "ledger/project-ledger.md"
+  ],
+  "forbidden_paths": [
+    "crates/**",
+    "Cargo.toml",
+    "Cargo.lock",
+    "ci/**",
+    ".github/**",
+    "scripts/**",
+    "LICENSE-*",
+    "NOTICE",
+    "examples/**"
+  ],
+  "required_validation": [
+    "git diff --check",
+    "cargo fmt --check",
+    "cargo test",
+    "cargo run -p ccl-cli -- preflight --repo ."
+  ],
+  "validation": {
+    "commands": [
+      {
+        "id": "git-diff-check",
+        "program": "git",
+        "args": ["diff", "--check"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-fmt",
+        "program": "cargo",
+        "args": ["fmt", "--check"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "cargo-test",
+        "program": "cargo",
+        "args": ["test"],
+        "required": true,
+        "wall_timeout_seconds": 300
+      },
+      {
+        "id": "preflight",
+        "program": "cargo",
+        "args": ["run", "-p", "ccl-cli", "--", "preflight", "--repo", "."],
+        "required": true,
+        "wall_timeout_seconds": 300
+      }
+    ]
+  },
+  "github_ci_as_evidence": false,
+  "ledger_update_required": true,
+  "verdicts": {
+    "pass": "Documentation edits stay inside allowed paths and local checks pass.",
+    "pass_with_warnings": "Documentation edits pass with non-blocking warnings.",
+    "fail": "Documentation edits violated scope or required validation."
+  }
+}

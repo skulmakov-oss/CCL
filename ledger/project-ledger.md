@@ -1,5 +1,102 @@
 # CCL Project Ledger
 
+## 2026-06-21 — Real AI-Agent Task Contract Examples Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Developer Experience
+- Task type: example contracts
+- Branch: docs/real-agent-task-contract-examples
+- PR: #19
+- Base main HEAD: 426f508e78134ed3331559e874255f186706e753
+
+### Basis
+
+- README.md
+- docs/roadmap.md
+- docs/task-contract.md
+- docs/demo.md
+- examples/semantic-task-contract.json
+- examples/ccl-admission-task-contract.json
+- examples/ccl-env-policy-task-contract.json
+- crates/ccl-core/src/task_contract.rs
+
+### Changed Files
+
+Created:
+- docs/agent-task-contract-examples.md
+- examples/agent-docs-task-contract.json
+- examples/agent-test-fix-task-contract.json
+- examples/agent-refactor-task-contract.json
+- examples/agent-small-feature-task-contract.json
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\\scripts\\demo.ps1 -VerboseEvidence`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Example Contract Proof
+
+- docs-only agent contract added: YES
+- test-fix agent contract added: YES
+- refactor agent contract added: YES
+- small-feature agent contract added: YES
+- example guide added: YES
+- all contract checks passed: YES
+- examples used as evidence: NO
+- agent testimony used as evidence: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- runtime behavior changed: NO
+- CCL admission authority changed: NO
+- examples are templates: YES
+- examples are evidence: NO
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- This PR adds examples and documentation only.
+- Example contracts are templates and must be adapted before real use.
+- Examples do not replace local CCL gate evidence.
+- No direct agent integration is implemented.
+
+### Next Gate
+
+- recommended next gate: Public CI Metadata Seed
+- reason: after realistic examples exist, public project hygiene can add GitHub CI visibility while preserving local CCL admission authority.
+
 ## 2026-06-21 — Gate Run UX Summary Seed
 
 Status: PASS WITH WARNINGS

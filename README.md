@@ -186,6 +186,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/reviews/external-review-intake.md`](docs/reviews/external-review-intake.md) — external review intake and disposition notes.
 - [`docs/security/threat-model-notes.md`](docs/security/threat-model-notes.md) — current threat model notes and hardening backlog.
 - [`docs/security/environment-allowlist-policy.md`](docs/security/environment-allowlist-policy.md) — design seed for future environment allowlist enforcement.
+- [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.md) — guide to realistic AI-agent task contract examples.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
 - [`scripts/demo.ps1`](scripts/demo.ps1) — repeatable PowerShell demo script.
 - [`scripts/demo.sh`](scripts/demo.sh) — repeatable Bash demo script for Git Bash, Linux, and macOS.
@@ -194,6 +195,10 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`examples/ccl-validation-task-contract.json`](examples/ccl-validation-task-contract.json) — validation runner example contract.
 - [`examples/ccl-scope-task-contract.json`](examples/ccl-scope-task-contract.json) — scope/diff policy check example contract.
 - [`examples/ccl-admission-task-contract.json`](examples/ccl-admission-task-contract.json) — admission verdict example contract.
+- [`examples/agent-docs-task-contract.json`](examples/agent-docs-task-contract.json) — docs-only agent task example.
+- [`examples/agent-test-fix-task-contract.json`](examples/agent-test-fix-task-contract.json) — focused test-fix agent task example.
+- [`examples/agent-refactor-task-contract.json`](examples/agent-refactor-task-contract.json) — constrained refactor agent task example.
+- [`examples/agent-small-feature-task-contract.json`](examples/agent-small-feature-task-contract.json) — narrow feature agent task example.
 
 ---
 
@@ -218,12 +223,20 @@ Current implemented direction:
 - external review intake / threat model notes.
 - demo script.
 - environment allowlist policy evaluation.
+- gate run UX summary.
+- real AI-agent task contract examples.
 
 Next implementation direction:
 
 ```text
 Real AI-Agent Task Contract Examples Seed
 ```
+
+## AI-Agent Task Examples
+
+CCL includes example task contracts for common AI-agent workflows. These examples are templates, not evidence.
+
+See [`docs/agent-task-contract-examples.md`](docs/agent-task-contract-examples.md).
 
 Current capture layer already supports:
 
