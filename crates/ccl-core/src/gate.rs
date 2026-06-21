@@ -465,8 +465,54 @@ fn main() {
         fs::write(repo.join(".gitignore"), ".ccl/\n").unwrap();
         write_commit_file(&repo, ".gitignore", ".ccl/\n");
         write_commit_file(&repo, "src/app.rs", "fn main() {}\n");
-        write_commit_file(&repo, "ledger/project-ledger.md", "# Ledger\n");
+        write_commit_file(&repo, "ledger/project-ledger.md", gate_ledger_text());
         repo
+    }
+
+    fn gate_ledger_text() -> &'static str {
+        r#"# CCL Project Ledger
+
+## 2026-06-21 — Admission Verdict From Evidence Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: Admission
+- Task type: guard_gate
+- Branch: feat/admission-verdict-from-evidence-seed
+- PR: #9
+- Base main HEAD: 924a789e091c74beae4575c6346a8926cf0bc1e3
+
+### Objective
+
+- Objective: Compute an admission verdict from existing validation and scope evidence.
+
+### Validation
+
+- GitHub CI used as evidence: NO
+
+### Next Gate
+
+- recommended next gate: Gate Orchestration Seed
+- reason: admission verdicts are now derived mechanically from evidence, so the next layer is a single orchestrator over the existing deterministic steps
+
+### Admission Proof
+
+- contract path: examples/ccl-admission-task-contract.json
+- command: cargo run -p ccl-cli -- admission verdict --contract examples/ccl-admission-task-contract.json --repo . --validation-manifest .ccl/runs/validation-1782044715817-22052/validation-run-manifest.json --scope-manifest .ccl/runs/scope-1782044716205-33848/scope-check-manifest.json
+- status: PASS
+- admission verdict path: .ccl/runs/admission-1782044772197-20276/admission-verdict.json
+- ledger verification manifest path: .ccl/runs/ledger-1782044661021-1332/ledger-verification-manifest.json
+
+### Boundary Conclusion
+
+- admission verdict command added: YES
+- validation manifest consumed: YES
+- scope manifest consumed: YES
+- admission verdict invoked: YES
+- GitHub CI used as evidence: NO
+"#
     }
 
     fn stub_validation_outcome(
@@ -581,6 +627,10 @@ fn main() {
                     validation_commands_count: 1,
                     required_validation_failures_count: 0,
                     missing_command_result_artifacts_count: 0,
+                    ledger_verification_status: Some("PASS".to_string()),
+                    ledger_verification_manifest_path: Some(
+                        ".ccl/runs/ledger-1/ledger-verification-manifest.json".to_string(),
+                    ),
                     ledger_exists: true,
                     ledger_update_required: true,
                     contract_sha256_matches_validation: true,
@@ -652,11 +702,8 @@ fn main() {
                     &admission_request.contract_path,
                     ".ccl/runs/validation-1/validation-run-manifest.json",
                     ".ccl/runs/scope-1/scope-check-manifest.json",
-                    AdmissionStatus::PassWithWarnings,
-                    vec![AdmissionWarning {
-                        kind: "ledger_semantic_verification_not_implemented".to_string(),
-                        reason: "ledger semantic verification not implemented yet".to_string(),
-                    }],
+                    AdmissionStatus::Pass,
+                    vec![],
                     vec![],
                 ))
             },
@@ -667,7 +714,7 @@ fn main() {
             order.borrow().as_slice(),
             &["validation", "scope", "admission"]
         );
-        assert_eq!(outcome.manifest.status, AdmissionStatus::PassWithWarnings);
+        assert_eq!(outcome.manifest.status, AdmissionStatus::Pass);
         assert_eq!(outcome.manifest.steps.len(), 3);
         assert!(Path::new(&repo.join(&outcome.manifest_path)).exists());
         assert!(!outcome.manifest.github_ci_used_as_evidence);
@@ -684,7 +731,7 @@ fn main() {
         })
         .unwrap();
 
-        assert_eq!(outcome.manifest.status, AdmissionStatus::PassWithWarnings);
+        assert_eq!(outcome.manifest.status, AdmissionStatus::Pass);
         assert_eq!(outcome.manifest.steps.len(), 3);
         assert_eq!(outcome.manifest.steps[0].name, GateStepName::Validation);
         assert_eq!(outcome.manifest.steps[1].name, GateStepName::Scope);

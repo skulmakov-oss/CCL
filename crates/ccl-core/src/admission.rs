@@ -1,3 +1,4 @@
+use crate::ledger::{self, LedgerVerificationStatus};
 use crate::scope::{ScopeCheckManifest, ScopeCheckStatus};
 use crate::task_contract::TaskContract;
 use crate::validation_runner::{ValidationRunManifest, ValidationRunStatus};
@@ -41,6 +42,10 @@ pub struct AdmissionEvidenceSummary {
     pub validation_commands_count: usize,
     pub required_validation_failures_count: usize,
     pub missing_command_result_artifacts_count: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ledger_verification_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ledger_verification_manifest_path: Option<String>,
     pub ledger_exists: bool,
     pub ledger_update_required: bool,
     pub contract_sha256_matches_validation: bool,
@@ -94,6 +99,8 @@ pub enum AdmissionVerdictError {
     Io(#[from] std::io::Error),
     #[error("json error: {0}")]
     Json(#[from] serde_json::Error),
+    #[error("ledger verification error: {0}")]
+    Ledger(String),
 }
 
 pub fn run_admission_verdict(
@@ -412,19 +419,66 @@ pub fn run_admission_verdict(
 
     let ledger_path = resolve_input_path(&repo_root, &request.ledger_path);
     let ledger_exists = ledger_path.is_file();
-    if contract.ledger_update_required && !ledger_exists {
-        violations.push(AdmissionViolation {
-            kind: "ledger_missing".to_string(),
-            reason: format!("ledger file missing: {}", ledger_path.display()),
-        });
-    }
+    let mut ledger_verification_status = None;
+    let mut ledger_verification_manifest_path = None;
 
-    if ledger_exists {
-        warnings.push(AdmissionWarning {
-            kind: "ledger_semantic_verification_not_implemented".to_string(),
-            reason: "ledger file exists but semantic ledger-entry verification is future work"
-                .to_string(),
-        });
+    if contract.ledger_update_required {
+        let ledger_outcome = ledger::run_ledger_verification(ledger::LedgerVerificationRequest {
+            contract_path: request.contract_path.clone(),
+            repo: request.repo.clone(),
+            ledger_path: request.ledger_path.clone(),
+        })
+        .map_err(|error| AdmissionVerdictError::Ledger(error.to_string()))?;
+
+        ledger_verification_status = Some(ledger_outcome.manifest.status.to_string());
+        ledger_verification_manifest_path = Some(ledger_outcome.manifest_path.clone());
+
+        match ledger_outcome.manifest.status {
+            LedgerVerificationStatus::Pass => {}
+            LedgerVerificationStatus::PassWithWarnings => {
+                warnings.extend(ledger_outcome.manifest.warnings.into_iter().map(|warning| {
+                    AdmissionWarning {
+                        kind: format!("ledger_{}", warning.kind),
+                        reason: warning.reason,
+                    }
+                }));
+            }
+            LedgerVerificationStatus::Fail => {
+                violations.push(AdmissionViolation {
+                    kind: "ledger_verification_failed".to_string(),
+                    reason: ledger_outcome
+                        .manifest
+                        .reason
+                        .clone()
+                        .unwrap_or_else(|| "ledger verification failed".to_string()),
+                });
+            }
+            LedgerVerificationStatus::ContractFail => {
+                return write_contract_fail_manifest(
+                    &repo_root,
+                    &manifest_path,
+                    build_contract_fail_manifest(
+                        AdmissionManifestBase {
+                            admission_run_id,
+                            contract_path: contract_path_string,
+                            contract_sha256,
+                            repo_path: repo_path_string,
+                            validation_manifest_path: validation_manifest_path_string,
+                            scope_manifest_path: scope_manifest_path_string,
+                            ledger_path: ledger_path_string,
+                            started_unix_ms,
+                        },
+                        Some(
+                            ledger_outcome
+                                .manifest
+                                .reason
+                                .clone()
+                                .unwrap_or_else(|| "ledger_verification_contract_fail".to_string()),
+                        ),
+                    ),
+                );
+            }
+        }
     }
 
     let evidence = AdmissionEvidenceSummary {
@@ -436,6 +490,8 @@ pub fn run_admission_verdict(
         validation_commands_count: validation_manifest.commands.len(),
         required_validation_failures_count: required_failed_commands,
         missing_command_result_artifacts_count: missing_command_result_artifacts,
+        ledger_verification_status,
+        ledger_verification_manifest_path,
         ledger_exists,
         ledger_update_required: contract.ledger_update_required,
         contract_sha256_matches_validation: validation_contract_sha_matches,
@@ -537,6 +593,8 @@ fn build_contract_fail_manifest(
             validation_commands_count: 0,
             required_validation_failures_count: 0,
             missing_command_result_artifacts_count: 0,
+            ledger_verification_status: None,
+            ledger_verification_manifest_path: None,
             ledger_exists: false,
             ledger_update_required: false,
             contract_sha256_matches_validation: false,
@@ -846,7 +904,58 @@ mod tests {
         let ledger = repo.join("ledger");
         fs::create_dir_all(&ledger).unwrap();
         let ledger_path = ledger.join("project-ledger.md");
-        fs::write(&ledger_path, "# Ledger\n").unwrap();
+        fs::write(
+            &ledger_path,
+            r#"# CCL Project Ledger
+
+## 2026-06-21 — Admission Verdict From Evidence Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: Admission
+- Task type: guard_gate
+- Branch: feat/admission-verdict-from-evidence-seed
+- PR: #9
+- Base main HEAD: 924a789e091c74beae4575c6346a8926cf0bc1e3
+
+### Objective
+
+- Objective: Compute an admission verdict from existing validation and scope evidence.
+
+### Validation
+
+- GitHub CI used as evidence: NO
+
+### Next Gate
+
+- recommended next gate: Gate Orchestration Seed
+- reason: admission verdicts are now derived mechanically from evidence, so the next layer is a single orchestrator over the existing deterministic steps
+
+### Admission Proof
+
+- contract path: examples/ccl-admission-task-contract.json
+- command: cargo run -p ccl-cli -- admission verdict --contract examples/ccl-admission-task-contract.json --repo . --validation-manifest .ccl/runs/validation-1782044715817-22052/validation-run-manifest.json --scope-manifest .ccl/runs/scope-1782044716205-33848/scope-check-manifest.json
+- status: PASS
+- admission verdict path: .ccl/runs/admission-1782044772197-20276/admission-verdict.json
+- ledger verification manifest path: .ccl/runs/ledger-1782044661021-1332/ledger-verification-manifest.json
+
+### Boundary Conclusion
+
+- admission verdict command added: YES
+- validation manifest consumed: YES
+- scope manifest consumed: YES
+- admission verdict invoked: YES
+- GitHub CI used as evidence: NO
+
+### Next Gate
+
+- recommended next gate: External Review Intake / Threat Model Notes Seed
+- reason: ledger semantics are now verified deterministically, so the next risk reduction step is review intake and threat modeling
+"#,
+        )
+        .unwrap();
         ledger_path
     }
 
@@ -895,7 +1004,7 @@ mod tests {
     }
 
     #[test]
-    fn validation_pass_and_scope_pass_yield_warning_status_when_ledger_exists() {
+    fn validation_pass_and_scope_pass_yield_pass_status_when_ledger_exists() {
         let repo = repo_dir();
         let (contract, validation_manifest, scope_manifest, ledger_path) = valid_result(
             &repo,
@@ -916,8 +1025,8 @@ mod tests {
         ))
         .unwrap();
 
-        assert_eq!(outcome.manifest.status, AdmissionStatus::PassWithWarnings);
-        assert!(outcome
+        assert_eq!(outcome.manifest.status, AdmissionStatus::Pass);
+        assert!(!outcome
             .manifest
             .warnings
             .iter()
@@ -1304,12 +1413,13 @@ mod tests {
         ))
         .unwrap();
 
-        assert_eq!(outcome.manifest.status, AdmissionStatus::Fail);
+        assert_eq!(outcome.manifest.status, AdmissionStatus::ContractFail);
         assert!(outcome
             .manifest
-            .violations
-            .iter()
-            .any(|violation| violation.kind == "ledger_missing"));
+            .reason
+            .as_deref()
+            .unwrap_or_default()
+            .contains("ledger_missing"));
     }
 
     #[test]

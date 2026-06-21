@@ -1,5 +1,111 @@
 # CCL Project Ledger
 
+## 2026-06-21 — Ledger Semantic Verification Seed
+
+Status: PASS
+
+### Scope
+
+- Workstream: CCL Phase 1
+- Task type: ledger semantic verification
+- Branch: feat/ledger-semantic-verification-seed
+- PR: #12
+- Base main HEAD: 924a789e091c74beae4575c6346a8926cf0bc1e3
+
+### Basis
+
+- README.md
+- CCL_DNA.md
+- docs/architecture.md
+- docs/task-contract.md
+- docs/agent-report-format.md
+- docs/project-ledger.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- examples/semantic-task-contract.json
+- examples/ccl-validation-task-contract.json
+- examples/ccl-scope-task-contract.json
+- examples/ccl-admission-task-contract.json
+- crates/ccl-core/src/task_contract.rs
+- crates/ccl-core/src/capture.rs
+- crates/ccl-core/src/validation_runner.rs
+- crates/ccl-core/src/scope.rs
+- crates/ccl-core/src/admission.rs
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/verdict.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/ledger.rs
+
+Edited:
+- README.md
+- docs/roadmap.md
+- crates/ccl-core/src/admission.rs
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- capture --id cargo-version --repo . -- cargo --version`: PASS
+- `cargo run -p ccl-cli -- capture --id local-admission-guard --repo . --wall-timeout 300 -- powershell.exe -File .\\ci\\admission.ps1 --full`: PASS
+- `cargo run -p ccl-cli -- ledger verify --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Ledger Verification Proof
+
+- contract path: examples/ccl-admission-task-contract.json
+- command: cargo run -p ccl-cli -- ledger verify --contract examples/ccl-admission-task-contract.json --repo .
+- status: PASS
+- ledger verification manifest path: .ccl/runs/ledger-1782047393414-23288/ledger-verification-manifest.json
+- matched entry: ## 2026-06-21 — Admission Verdict From Evidence Seed
+- required checks: PASS
+- violations count: 0
+- warnings count: 0
+
+### Gate Proof
+
+- command: cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .
+- status: PASS
+- gate manifest path: .ccl/runs/gate-1782047394263-21812/gate-run-manifest.json
+- admission status: PASS
+
+### Boundary Conclusion
+
+- ledger verify command added: YES
+- ledger semantic verification integrated into admission: YES
+- old ledger semantic warning removed when verification passes: YES
+- LLM used for ledger verification: NO
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- Full CCL gate orchestration is still not the final admission authority; ledger semantic verification remains a deterministic marker matcher rather than natural-language understanding.
+
+### Next Gate
+
+- recommended next gate: External Review Intake / Threat Model Notes Seed
+- reason: the evidence chain now includes ledger verification, so the next reduction is external review and threat-model hygiene.
+
 ## 2026-06-21 — Gate Orchestration Seed
 
 Status: PASS WITH WARNINGS
@@ -106,6 +212,10 @@ Status: PASS WITH WARNINGS
 - PR: #9 — https://github.com/skulmakov-oss/CCL/pull/9
 - Base main HEAD: fc569f1127cd2352771d5c88a3ef885973fdb5a2
 
+### Objective
+
+- Objective: Compute an admission verdict from existing validation and scope evidence.
+
 ### Basis
 
 - README.md
@@ -166,6 +276,11 @@ Deleted:
 - `cargo run -p ccl-cli -- admission verdict --contract examples/ccl-admission-task-contract.json --repo . --validation-manifest .ccl/runs/validation-1782038284248-780/validation-run-manifest.json --scope-manifest .ccl/runs/scope-1782038284499-31240/scope-check-manifest.json`: PASS WITH WARNINGS
 - GitHub CI used as evidence: NO
 
+### Next Gate
+
+- recommended next gate: Gate Orchestration Seed
+- reason: admission verdicts are now derived mechanically from evidence, so the next layer is a single orchestrator over the existing deterministic steps
+
 ### Admission Proof
 
 - contract path: `examples/ccl-admission-task-contract.json`
@@ -174,6 +289,7 @@ Deleted:
 - command: `cargo run -p ccl-cli -- admission verdict --contract examples/ccl-admission-task-contract.json --repo . --validation-manifest .ccl/runs/validation-1782038284248-780/validation-run-manifest.json --scope-manifest .ccl/runs/scope-1782038284499-31240/scope-check-manifest.json`
 - status: PASS WITH WARNINGS
 - admission verdict path: `.ccl/runs/admission-1782038327776-3024/admission-verdict.json`
+- ledger verification manifest path: `.ccl/runs/ledger-1782044661021-1332/ledger-verification-manifest.json`
 - validation status: PASS
 - scope status: PASS
 - ledger exists: YES
