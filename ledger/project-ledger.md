@@ -1,5 +1,95 @@
 # CCL Project Ledger
 
+## 2026-06-21 — Demo Script Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Governance
+- Task type: demo documentation
+- Branch: docs/demo-script-seed
+- PR: #14
+- Base main HEAD: a9cd632794646f248dff6654c9fff9d785c88706
+
+### Basis
+
+- README.md
+- docs/roadmap.md
+- docs/demo.md
+- scripts/demo.ps1
+- scripts/demo.sh
+- ledger/project-ledger.md
+- examples/ccl-admission-task-contract.json
+
+### Changed Files
+
+Created:
+- docs/demo.md
+- scripts/demo.ps1
+- scripts/demo.sh
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -VerboseEvidence`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Demo Proof
+
+- demo script added: YES
+- demo documentation added: YES
+- default demo command: `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1`
+- verbose evidence demo command: `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -VerboseEvidence`
+- cross-platform demo command: `bash scripts/demo.sh`
+- cross-platform verbose evidence demo command: `bash scripts/demo.sh --verbose-evidence`
+- default demo result: PASS
+- verbose demo result: PASS
+- cross-platform demo result: PASS
+- cross-platform verbose demo result: PASS
+- gate run result: PASS
+- generated artifacts location: `.ccl/runs/`
+- GitHub CI used as evidence: NO
+- agent testimony used as evidence: NO
+
+### Boundary Conclusion
+
+- runtime behavior changed: NO
+- CCL admission authority changed: NO
+- demo used as evidence: NO
+- demo invokes CCL evidence-producing commands: YES
+- GitHub CI used as evidence: NO
+
+### Warnings
+
+- This is a demo/documentation PR only.
+- Demo artifacts are local and generated under ignored `.ccl/runs/`.
+- The demo does not prove sandboxing, manifest signing, or environment allowlist enforcement.
+
+### Next Gate
+
+- recommended next gate: Environment Allowlist Policy Design Seed
+- reason: environment variable manipulation is recorded as a near-term hardening risk in threat model notes.
+
 ## 2026-06-21 — Ledger Semantic Verification Seed
 
 Status: PASS
