@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Keep this file LF-normalized for Bash compatibility across shells.
 set -euo pipefail
 
 VERBOSE_EVIDENCE=0
