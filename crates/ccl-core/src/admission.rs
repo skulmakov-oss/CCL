@@ -305,6 +305,41 @@ pub fn run_admission_verdict(
         });
     }
 
+    match validation_manifest.environment_policy.status {
+        crate::environment::EnvironmentPolicyStatus::Pass => {}
+        crate::environment::EnvironmentPolicyStatus::Warn => {
+            warnings.push(AdmissionWarning {
+                kind: "validation_environment_policy_warned".to_string(),
+                reason: "validation manifest reported environment policy WARN".to_string(),
+            });
+        }
+        crate::environment::EnvironmentPolicyStatus::Fail => {
+            violations.push(AdmissionViolation {
+                kind: "validation_environment_policy_failed".to_string(),
+                reason: "validation manifest reported environment policy FAIL".to_string(),
+            });
+        }
+        crate::environment::EnvironmentPolicyStatus::ContractFail => {
+            return write_contract_fail_manifest(
+                &repo_root,
+                &manifest_path,
+                build_contract_fail_manifest(
+                    AdmissionManifestBase {
+                        admission_run_id,
+                        contract_path: contract_path_string,
+                        contract_sha256,
+                        repo_path: repo_path_string,
+                        validation_manifest_path: validation_manifest_path_string,
+                        scope_manifest_path: scope_manifest_path_string,
+                        ledger_path: ledger_path_string,
+                        started_unix_ms,
+                    },
+                    Some("validation_manifest_environment_policy_contract_fail".to_string()),
+                ),
+            );
+        }
+    }
+
     if !matches!(
         validation_manifest.status,
         ValidationRunStatus::Pass | ValidationRunStatus::PassWithWarnings
@@ -684,7 +719,8 @@ mod tests {
     use super::*;
     use crate::scope::{ScopeCheckManifest, ScopeCheckStatus, ScopeCheckSummary, ScopeLimitStatus};
     use crate::validation_runner::{
-        ValidationCommandCaptureEntry, ValidationRunManifest, ValidationRunStatus,
+        ValidationCommandCaptureEntry, ValidationEnvironmentPolicySummary, ValidationRunManifest,
+        ValidationRunStatus,
     };
     use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -829,6 +865,7 @@ mod tests {
                 failure_class: None,
             }],
             github_ci_used_as_evidence: github_ci,
+            environment_policy: ValidationEnvironmentPolicySummary::default(),
             reason: None,
         };
         let manifest_path = repo

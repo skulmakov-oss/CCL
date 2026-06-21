@@ -1,3 +1,4 @@
+use crate::environment::{EnvironmentPolicy, EnvironmentPolicyResult, EnvironmentPolicyStatus};
 use crate::evidence::{
     CaptureRequest, CommandCaptureResult, CommandEvidenceEntry, CommandStatus, EnvSnapshot,
     EvidenceManifest, FailureClass, HashScope, OutputLimitPolicy, RunRecord, StreamCaptureResult,
@@ -116,22 +117,6 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
         manifest_path: manifest_path.clone(),
     };
 
-    let command_json = CommandArtifact {
-        id: request.id.clone(),
-        repo_path: repo.to_string_lossy().into_owned(),
-        cwd: repo.to_string_lossy().into_owned(),
-        program: request.command.program.clone(),
-        args: request.command.args.clone(),
-        wall_timeout_seconds: request.policy.wall_timeout_seconds,
-        max_stdout_bytes: request.policy.max_stdout_bytes,
-        max_stderr_bytes: request.policy.max_stderr_bytes,
-        max_combined_output_bytes: request.policy.max_combined_output_bytes,
-        on_output_limit: request.policy.on_output_limit.clone(),
-        capture_env: request.policy.capture_env,
-        created_unix_ms,
-    };
-    write_json_file(&command_path, &command_json)?;
-
     let env_snapshot = if request.policy.capture_env {
         EnvSnapshot {
             variables: capture_environment(),
@@ -145,6 +130,60 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
     fs::write(&env_path, &env_json)?;
     let env_sha256 = sha256_hex(&env_json);
 
+    let environment_policy = request
+        .environment_policy
+        .clone()
+        .unwrap_or_else(EnvironmentPolicy::record_only);
+    let environment_policy_result = environment_policy.evaluate(&env_snapshot.variables);
+    let environment_policy_config = environment_policy.clone();
+
+    let command_json = CommandArtifact {
+        id: request.id.clone(),
+        repo_path: repo.to_string_lossy().into_owned(),
+        cwd: repo.to_string_lossy().into_owned(),
+        program: request.command.program.clone(),
+        args: request.command.args.clone(),
+        wall_timeout_seconds: request.policy.wall_timeout_seconds,
+        max_stdout_bytes: request.policy.max_stdout_bytes,
+        max_stderr_bytes: request.policy.max_stderr_bytes,
+        max_combined_output_bytes: request.policy.max_combined_output_bytes,
+        on_output_limit: request.policy.on_output_limit.clone(),
+        capture_env: request.policy.capture_env,
+        environment_policy: environment_policy_config.clone(),
+        created_unix_ms,
+    };
+    write_json_file(&command_path, &command_json)?;
+
+    if matches!(
+        environment_policy_result.status,
+        EnvironmentPolicyStatus::Fail
+    ) && matches!(
+        environment_policy.mode,
+        crate::environment::EnvironmentPolicyMode::Enforce
+            | crate::environment::EnvironmentPolicyMode::Strict
+    ) {
+        let message = environment_policy_result
+            .violations
+            .first()
+            .map(|violation| {
+                format!(
+                    "environment policy failed for {}: {}",
+                    violation.variable, violation.reason
+                )
+            })
+            .unwrap_or_else(|| "environment policy failed".to_string());
+        return persist_failed_capture(
+            &run_id,
+            &artifact_paths,
+            &request,
+            created_unix_ms,
+            env_sha256,
+            FailureClass::EnvironmentPolicyFailed,
+            &message,
+            environment_policy_result,
+        );
+    }
+
     let mut child = Command::new(&request.command.program);
     child.args(&request.command.args);
     child.current_dir(&repo);
@@ -157,13 +196,15 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
         Ok(child) => child,
         Err(error) => {
             let spawn_message = error.to_string();
-            return persist_spawn_failure(
+            return persist_failed_capture(
                 &run_id,
                 &artifact_paths,
                 &request,
                 created_unix_ms,
                 env_sha256,
+                FailureClass::SpawnFailed,
                 &spawn_message,
+                environment_policy_result,
             );
         }
     };
@@ -171,26 +212,30 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
     let stdout = match spawned.stdout.take() {
         Some(stdout) => stdout,
         None => {
-            return persist_spawn_failure(
+            return persist_failed_capture(
                 &run_id,
                 &artifact_paths,
                 &request,
                 created_unix_ms,
                 env_sha256,
+                FailureClass::SpawnFailed,
                 "stdout pipe unavailable",
+                environment_policy_result,
             );
         }
     };
     let stderr = match spawned.stderr.take() {
         Some(stderr) => stderr,
         None => {
-            return persist_spawn_failure(
+            return persist_failed_capture(
                 &run_id,
                 &artifact_paths,
                 &request,
                 created_unix_ms,
                 env_sha256,
+                FailureClass::SpawnFailed,
                 "stderr pipe unavailable",
+                environment_policy_result,
             );
         }
     };
@@ -320,6 +365,7 @@ pub fn capture_command(request: CaptureRequest) -> Result<CaptureOutcome, Captur
         max_combined_output_bytes: request.policy.max_combined_output_bytes,
         env_path: env_path.to_string_lossy().into_owned(),
         env_sha256,
+        environment_policy: environment_policy_result.clone(),
         result_path: result_path.to_string_lossy().into_owned(),
         command_path: command_path.to_string_lossy().into_owned(),
     };
@@ -385,6 +431,7 @@ struct CommandArtifact {
     max_combined_output_bytes: u64,
     on_output_limit: OutputLimitPolicy,
     capture_env: bool,
+    environment_policy: EnvironmentPolicy,
     created_unix_ms: u128,
 }
 
@@ -667,13 +714,16 @@ struct ArtifactPaths {
     manifest_path: PathBuf,
 }
 
-fn persist_spawn_failure(
+#[allow(clippy::too_many_arguments)]
+fn persist_failed_capture(
     run_id: &str,
     paths: &ArtifactPaths,
     request: &CaptureRequest,
     created_unix_ms: u128,
     env_sha256: String,
+    failure_class: FailureClass,
     message: &str,
+    environment_policy: EnvironmentPolicyResult,
 ) -> Result<CaptureOutcome, CaptureError> {
     fs::write(&paths.stdout_path, b"")?;
     fs::write(&paths.stderr_path, message.as_bytes())?;
@@ -693,7 +743,7 @@ fn persist_spawn_failure(
             .to_string_lossy()
             .into_owned(),
         status: CommandStatus::Fail,
-        failure_class: Some(FailureClass::SpawnFailed),
+        failure_class: Some(failure_class),
         exit_code: None,
         timed_out: false,
         output_limit_exceeded: false,
@@ -721,6 +771,7 @@ fn persist_spawn_failure(
         max_combined_output_bytes: request.policy.max_combined_output_bytes,
         env_path: paths.env_path.to_string_lossy().into_owned(),
         env_sha256,
+        environment_policy,
         result_path: paths.result_path.to_string_lossy().into_owned(),
         command_path: paths.command_path.to_string_lossy().into_owned(),
     };
@@ -779,6 +830,7 @@ fn persist_spawn_failure(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::environment::EnvironmentPolicyStatus;
     use crate::evidence::{CapturePolicy, CommandSpec};
     use std::sync::OnceLock;
 
@@ -908,6 +960,7 @@ fn main() {
                 args: args.iter().map(|s| s.to_string()).collect(),
             },
             policy,
+            environment_policy: None,
         })
         .unwrap()
     }
@@ -934,6 +987,10 @@ fn main() {
         );
         assert!(Path::new(&outcome.command_result.env_path).exists());
         assert!(!outcome.command_result.env_sha256.is_empty());
+        assert_eq!(
+            outcome.command_result.environment_policy.status,
+            EnvironmentPolicyStatus::Pass
+        );
     }
 
     #[test]
@@ -991,6 +1048,7 @@ fn main() {
                 args: vec![],
             },
             policy: CapturePolicy::default(),
+            environment_policy: None,
         })
         .unwrap();
 

@@ -1095,3 +1095,119 @@ Deleted:
 
 - recommended next gate: return PR #15 from Draft after rebasing onto this fix
 - reason: Environment Allowlist Policy Design Seed was blocked only by Bash demo line-ending validation failure.
+
+## 2026-06-21 — Environment Allowlist Enforcement Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Security / Governance
+- Task type: environment policy enforcement seed
+- Branch: feat/environment-allowlist-enforcement-seed
+- PR: #17
+- Base main HEAD: 72633d89e5d739c3bace993a06be24e40c81dcc8
+
+### Basis
+
+- README.md
+- docs/security/environment-allowlist-policy.md
+- docs/security/threat-model-notes.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- examples/ccl-admission-task-contract.json
+- examples/ccl-env-policy-task-contract.json
+- crates/ccl-core/src/capture.rs
+- crates/ccl-core/src/evidence.rs
+- crates/ccl-core/src/task_contract.rs
+- crates/ccl-core/src/validation_runner.rs
+- crates/ccl-core/src/admission.rs
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/environment.rs
+- crates/ccl-cli/src/main.rs
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/environment.rs
+- examples/ccl-env-policy-task-contract.json
+
+Edited:
+- README.md
+- crates/ccl-cli/src/main.rs
+- crates/ccl-core/src/admission.rs
+- crates/ccl-core/src/capture.rs
+- crates/ccl-core/src/evidence.rs
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/task_contract.rs
+- crates/ccl-core/src/validation_runner.rs
+- docs/roadmap.md
+- docs/security/environment-allowlist-policy.md
+- docs/security/threat-model-notes.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- validate run --contract examples/ccl-env-policy-task-contract.json --repo .`: PASS WITH WARNINGS
+- `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\scripts\demo.ps1 -VerboseEvidence`: PASS
+- `bash scripts/demo.sh`: PASS
+- `bash scripts/demo.sh --verbose-evidence`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Environment Policy Proof
+
+- environment policy parser added: YES
+- default record_only behavior preserved: YES
+- env classification added: YES
+- allowlist/denylist evaluation added: YES
+- deny precedence implemented: YES
+- result.json environment_policy summary added: YES
+- validation manifest environment_policy summary added: YES
+- warn mode supported: YES
+- enforce mode supported: YES
+- strict mode supported: YES
+- current gate run preserved: YES
+- environment mutation added: NO
+- sandboxing added: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- runtime behavior changed for default contracts: NO
+- opt-in environment policy evaluation added: YES
+- environment mutation added: NO
+- sandboxing added: NO
+- manifest signing added: NO
+- CCL admission authority changed: NO
+
+### Warnings
+
+- This is the first environment policy enforcement seed.
+- Default behavior remains `record_only`.
+- Full environment cleaning is not implemented.
+- Raw env snapshot redaction remains future hardening.
+- Sandbox isolation remains future hardening.
+
+### Next Gate
+
+- recommended next gate: Gate Run UX Summary Seed
+- reason: after env policy evaluation exists, `ccl gate run` should expose clearer human-readable summary, warnings, timings, and artifact paths without changing admission authority.

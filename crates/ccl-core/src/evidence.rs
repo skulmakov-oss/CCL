@@ -1,3 +1,4 @@
+use crate::environment::{EnvironmentPolicy, EnvironmentPolicyResult};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fmt;
@@ -28,6 +29,7 @@ pub enum FailureClass {
     StreamDrainFailed,
     IoError,
     SpawnFailed,
+    EnvironmentPolicyFailed,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -77,6 +79,8 @@ pub struct CaptureRequest {
     pub repo: PathBuf,
     pub command: CommandSpec,
     pub policy: CapturePolicy,
+    #[serde(default)]
+    pub environment_policy: Option<EnvironmentPolicy>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -110,6 +114,8 @@ pub struct CommandCaptureResult {
     pub max_combined_output_bytes: u64,
     pub env_path: String,
     pub env_sha256: String,
+    #[serde(default)]
+    pub environment_policy: EnvironmentPolicyResult,
     pub result_path: String,
     pub command_path: String,
 }

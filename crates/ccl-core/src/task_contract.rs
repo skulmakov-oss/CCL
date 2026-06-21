@@ -1,3 +1,4 @@
+use crate::environment::EnvironmentPolicy;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -35,6 +36,8 @@ pub struct TaskContract {
     pub validation: ValidationPlan,
     #[serde(default)]
     pub scope_limits: ScopeLimits,
+    #[serde(default)]
+    pub environment_policy: Option<EnvironmentPolicy>,
     pub github_ci_as_evidence: bool,
     pub ledger_update_required: bool,
     #[serde(default)]
@@ -266,5 +269,70 @@ mod tests {
         contract.task_type = TaskType::AuditOnly;
         let report = contract.validate();
         assert_eq!(report.status, crate::verdict::VerdictStatus::Pass);
+    }
+
+    #[test]
+    fn test_environment_policy_defaults_to_none() {
+        let contract = valid_contract();
+        assert!(contract.environment_policy.is_none());
+    }
+
+    #[test]
+    fn test_environment_policy_parses() {
+        let contract: TaskContract = serde_json::from_str(
+            r#"{
+            "project": "CCL",
+            "workstream": "Validation",
+            "task_type": "guard_gate",
+            "objective": "Test",
+            "required_context": {
+                "latest_prs": 10
+            },
+            "allowed_paths": ["src/**"],
+            "forbidden_paths": ["Cargo.toml"],
+            "required_validation": ["cargo test"],
+            "environment_policy": {
+                "mode": "warn",
+                "allow": ["PATH"],
+                "deny": ["RUSTFLAGS"],
+                "allow_prefixes": ["CARGO_TERM_"],
+                "deny_prefixes": ["GITHUB_"],
+                "redact_patterns": ["TOKEN"],
+                "unknown": "warn"
+            },
+            "github_ci_as_evidence": false,
+            "ledger_update_required": true
+        }"#,
+        )
+        .unwrap();
+        assert!(contract.environment_policy.is_some());
+        assert_eq!(
+            contract.environment_policy.as_ref().unwrap().mode,
+            crate::environment::EnvironmentPolicyMode::Warn
+        );
+    }
+
+    #[test]
+    fn test_environment_policy_invalid_mode_fails() {
+        let parsed = serde_json::from_str::<TaskContract>(
+            r#"{
+            "project": "CCL",
+            "workstream": "Validation",
+            "task_type": "guard_gate",
+            "objective": "Test",
+            "required_context": {
+                "latest_prs": 10
+            },
+            "allowed_paths": ["src/**"],
+            "forbidden_paths": ["Cargo.toml"],
+            "required_validation": ["cargo test"],
+            "environment_policy": {
+                "mode": "definitely_invalid"
+            },
+            "github_ci_as_evidence": false,
+            "ledger_update_required": true
+        }"#,
+        );
+        assert!(parsed.is_err());
     }
 }

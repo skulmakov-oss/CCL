@@ -284,7 +284,9 @@ mod tests {
     };
     use crate::evidence::CommandStatus;
     use crate::scope::{ScopeCheckManifest, ScopeCheckSummary, ScopeLimitStatus, ScopeViolation};
-    use crate::validation_runner::{ValidationCommandCaptureEntry, ValidationRunManifest};
+    use crate::validation_runner::{
+        ValidationCommandCaptureEntry, ValidationEnvironmentPolicySummary, ValidationRunManifest,
+    };
     use hex::encode as hex_encode;
     use sha2::{Digest, Sha256};
     use std::cell::RefCell;
@@ -545,6 +547,7 @@ Status: PASS WITH WARNINGS
                     failure_class: None,
                 }],
                 github_ci_used_as_evidence: false,
+                environment_policy: ValidationEnvironmentPolicySummary::default(),
                 reason: None,
             },
             manifest_path: ".ccl/runs/validation-1/validation-run-manifest.json".to_string(),

@@ -93,11 +93,13 @@ Expected work:
 
 Environment Allowlist Policy Design Seed records the future policy model for environment classification, allowlists, denylists, redaction, and admission semantics.
 
+Environment Allowlist Enforcement Seed implements deterministic policy evaluation with record_only, warn, enforce, and strict modes while keeping the default behavior compatible.
+
 Demo Script Seed records a repeatable local demonstration of the current CCL gate pipeline without changing runtime behavior. The seed includes Windows PowerShell and Bash entrypoints for the same deterministic sequence.
 
 Next implementation direction:
 
-Environment Allowlist Enforcement Seed
+Gate Run UX Summary Seed
 
 ## Phase 4 — Tauri Desktop Shell
 

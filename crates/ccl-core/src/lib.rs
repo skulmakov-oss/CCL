@@ -1,5 +1,6 @@
 pub mod admission;
 pub mod capture;
+pub mod environment;
 pub mod evidence;
 pub mod gate;
 pub mod ledger;

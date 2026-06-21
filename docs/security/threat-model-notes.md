@@ -46,8 +46,8 @@ These notes record current assumptions, mitigations, and deferred hardening item
 - ledger verifier is marker-based, not natural-language semantic understanding
 - Windows and Linux may diverge in process handling
 - large repository diff performance still needs future testing
-- environment policy is currently record-only: capture snapshots env but does not enforce allowlists yet
-- environment allowlist enforcement is planned as a future hardening gate
+- environment policy evaluation exists, but environment cleaning, full raw env redaction, and sandbox enforcement remain future hardening
+- environment allowlist enforcement continues to evolve as a hardening gate
 
 ## Deferred Hardening
 
