@@ -7,6 +7,7 @@ use ccl_core::preflight;
 use ccl_core::release;
 use ccl_core::release_checksum;
 use ccl_core::release_ledger;
+use ccl_core::release_manifest;
 use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
 use ccl_core::validation_runner::{self, ValidationRunManifest, ValidationRunStatus};
@@ -156,6 +157,10 @@ enum ReleaseCommands {
         #[arg(long = "input", value_name = "FILE")]
         inputs: Vec<PathBuf>,
     },
+    Manifest {
+        #[command(subcommand)]
+        action: ReleaseManifestCommands,
+    },
     Ledger {
         #[command(subcommand)]
         action: ReleaseLedgerCommands,
@@ -175,6 +180,22 @@ enum ReleaseLedgerCommands {
         ledger: PathBuf,
         #[arg(long)]
         entry_heading: Option<String>,
+    },
+}
+
+#[derive(Subcommand)]
+enum ReleaseManifestCommands {
+    DryAssemble {
+        #[arg(long)]
+        version: String,
+        #[arg(long)]
+        repo: PathBuf,
+        #[arg(long, value_name = "PATH")]
+        dry_run_manifest: PathBuf,
+        #[arg(long, value_name = "PATH")]
+        ledger_verification_manifest: PathBuf,
+        #[arg(long, value_name = "PATH")]
+        checksum_manifest: PathBuf,
     },
 }
 
@@ -439,6 +460,31 @@ fn main() {
                 print_release_checksum(&outcome, version, repo, inputs.len());
                 std::process::exit(release_checksum_exit_code(&outcome.status));
             }
+            ReleaseCommands::Manifest { action } => match action {
+                ReleaseManifestCommands::DryAssemble {
+                    version,
+                    repo,
+                    dry_run_manifest,
+                    ledger_verification_manifest,
+                    checksum_manifest,
+                } => {
+                    let outcome = release_manifest::run_release_manifest_dry_assemble(
+                        release_manifest::ReleaseManifestDryAssemblyRequest {
+                            repo: repo.clone(),
+                            version: version.clone(),
+                            dry_run_manifest_path: dry_run_manifest.clone(),
+                            ledger_verification_manifest_path: ledger_verification_manifest.clone(),
+                            checksum_manifest_path: checksum_manifest.clone(),
+                        },
+                    )
+                    .unwrap_or_else(|error| {
+                        eprintln!("Release manifest dry-assemble failed: {}", error);
+                        std::process::exit(1);
+                    });
+                    print_release_manifest_dry_assemble(&outcome, version, repo);
+                    std::process::exit(release_manifest_exit_code(&outcome.status));
+                }
+            },
             ReleaseCommands::Ledger { action } => match action {
                 ReleaseLedgerCommands::Verify {
                     version,
@@ -957,6 +1003,59 @@ fn print_release_checksum(
     }
 }
 
+fn print_release_manifest_dry_assemble(
+    outcome: &release_manifest::ReleaseManifestDryAssemblyOutcome,
+    version: &str,
+    repo: &Path,
+) {
+    println!("CCL Release Manifest Dry Assembly Summary");
+    println!("=========================================");
+    println!();
+    println!("Status: {}", outcome.status);
+    println!("Version: {}", version);
+    println!("Tag: v{}", version);
+    println!("Repo: {}", repo.display());
+    println!("Source commit: {}", outcome.manifest.source.commit);
+    println!(
+        "Dry-run manifest: {}",
+        outcome.manifest.evidence.release_dry_run_manifest
+    );
+    println!(
+        "Ledger verification manifest: {}",
+        outcome
+            .manifest
+            .evidence
+            .release_ledger_verification_manifest
+    );
+    println!(
+        "Checksum manifest: {}",
+        outcome.manifest.evidence.release_checksum_manifest
+    );
+    println!("Checksum entries: {}", outcome.manifest.checksums.len());
+    println!("Dry release manifest: {}", outcome.manifest_path);
+    println!();
+    println!("Side effects:");
+    println!("- Tag created: NO");
+    println!("- Release artifacts created: NO");
+    println!("- GitHub Release created: NO");
+    println!("- crates.io publish: NO");
+    println!("- GitHub CI used as evidence: NO");
+    if !outcome.manifest.warnings.is_empty() {
+        println!();
+        println!("Warnings:");
+        for warning in &outcome.manifest.warnings {
+            println!("- {}", warning);
+        }
+    }
+    if !outcome.manifest.violations.is_empty() {
+        println!();
+        println!("Violations:");
+        for violation in &outcome.manifest.violations {
+            println!("- {}", violation);
+        }
+    }
+}
+
 fn print_release_ledger_verification(
     outcome: &release_ledger::ReleaseLedgerVerificationOutcome,
     version: &str,
@@ -1064,6 +1163,15 @@ fn release_checksum_exit_code(status: &release_checksum::ReleaseChecksumStatus) 
         release_checksum::ReleaseChecksumStatus::PassWithWarnings => 10,
         release_checksum::ReleaseChecksumStatus::Fail => 20,
         release_checksum::ReleaseChecksumStatus::ContractFail => 30,
+    }
+}
+
+fn release_manifest_exit_code(status: &release_manifest::ReleaseManifestDryAssemblyStatus) -> i32 {
+    match status {
+        release_manifest::ReleaseManifestDryAssemblyStatus::Pass => 0,
+        release_manifest::ReleaseManifestDryAssemblyStatus::PassWithWarnings => 10,
+        release_manifest::ReleaseManifestDryAssemblyStatus::Fail => 20,
+        release_manifest::ReleaseManifestDryAssemblyStatus::ContractFail => 30,
     }
 }
 

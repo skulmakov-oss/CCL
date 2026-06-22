@@ -8,6 +8,7 @@ pub mod preflight;
 pub mod release;
 pub mod release_checksum;
 pub mod release_ledger;
+pub mod release_manifest;
 pub mod scope;
 pub mod task_contract;
 pub mod validation_runner;
