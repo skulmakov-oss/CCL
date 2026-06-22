@@ -1,5 +1,108 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Version / Tag Policy Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: version and tag policy
+- Branch: docs/version-tag-policy
+- PR: #26
+- Base main HEAD: d3e3976830d6947459aad1fdaf9965ad7148924d
+
+### Basis
+
+- README.md
+- docs/install.md
+- docs/release-artifacts.md
+- docs/ci-metadata.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- Cargo.toml
+- crates/ccl-cli/Cargo.toml
+- crates/ccl-core/Cargo.toml
+
+### Changed Files
+
+Created:
+- docs/versioning.md
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo . --verbose`: PASS
+- `bash scripts/demo.sh`: PASS
+- `CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json bash scripts/demo.sh`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Version / Tag Policy Proof
+
+- versioning doc added: YES
+- SemVer-compatible version format defined: YES
+- vMAJOR.MINOR.PATCH tag format defined: YES
+- pre-1.0 compatibility policy defined: YES
+- tag eligibility rules defined: YES
+- dirty-tree policy defined: YES
+- branch/commit policy defined: YES
+- Cargo version / Git tag relationship documented: YES
+- GitHub CI boundary documented: YES
+- actual tag created: NO
+- version bumped: NO
+- release artifacts created: NO
+- runtime behavior changed: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- official release tag created: NO
+- Cargo versions changed: NO
+- release artifacts generated: NO
+- release automation added: NO
+- local CCL release evidence required before future tags: YES
+- GitHub CI remains metadata: YES
+
+### Warnings
+
+- This PR is version/tag policy documentation only.
+- No tag is created.
+- No version is bumped.
+- No release artifact is created.
+- Release manifest schema remains future work.
+- GitHub CI remains metadata, not evidence.
+
+### Next Gate
+
+- recommended next gate: Release Manifest Schema Seed
+- reason: after version and tag policy exists, CCL needs a machine-checkable release manifest schema before release dry-runs or artifact generation.
+
 ## 2026-06-22 — Public CI Metadata Compatibility Fix
 
 Status: PASS WITH WARNINGS
