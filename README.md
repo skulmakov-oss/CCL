@@ -194,6 +194,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/release-artifacts.md`](docs/release-artifacts.md) — future release artifact, checksum, manifest, and evidence design.
 - [`docs/versioning.md`](docs/versioning.md) — future version and Git tag policy for CCL releases.
 - [`docs/release-manifest-schema.md`](docs/release-manifest-schema.md) — future release manifest schema, evidence binding, and validation responsibilities.
+- [`docs/release-dry-run.md`](docs/release-dry-run.md) — local release dry-run command, evidence manifest, and non-publishing boundaries.
 - [`schemas/ccl-release-manifest.schema.json`](schemas/ccl-release-manifest.schema.json) — machine-readable future release manifest JSON Schema.
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — public CI metadata workflow.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
@@ -239,7 +240,7 @@ Current implemented direction:
 Next implementation direction:
 
 ```text
-Local Release Dry-Run Seed
+Release Ledger Entry Verification Seed
 ```
 
 ## AI-Agent Task Examples
@@ -299,6 +300,19 @@ CCL does not yet generate official release manifests.
 The future release manifest schema is documented in [`docs/release-manifest-schema.md`](docs/release-manifest-schema.md), with a machine-readable draft at [`schemas/ccl-release-manifest.schema.json`](schemas/ccl-release-manifest.schema.json).
 
 A manifest will require local CCL evidence. GitHub CI remains public metadata, not release evidence.
+
+## Local Release Dry-Run
+
+CCL can perform a local release dry-run without publishing anything.
+
+```powershell
+cargo run -p ccl-cli -- release dry-run --version 0.1.0 --repo .
+```
+
+The dry-run writes local evidence under `.ccl/runs/**`.
+It does not create tags, artifacts, checksums, GitHub Releases, or crates.io publications.
+
+See [`docs/release-dry-run.md`](docs/release-dry-run.md).
 
 Current capture layer already supports:
 

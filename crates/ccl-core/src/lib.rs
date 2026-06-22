@@ -5,6 +5,7 @@ pub mod evidence;
 pub mod gate;
 pub mod ledger;
 pub mod preflight;
+pub mod release;
 pub mod scope;
 pub mod task_contract;
 pub mod validation_runner;
