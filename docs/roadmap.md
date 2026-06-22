@@ -114,9 +114,11 @@ Release Manifest Schema Seed defines a future machine-readable manifest schema b
 
 Local Release Dry-Run Seed adds a local release-intent check that validates version and tag shape, clean tree state, schema availability, and local CCL gate status without creating tags, artifacts, checksums, or releases.
 
+Release Ledger Entry Verification Seed binds a release dry-run manifest to an entry-local project ledger record with matching version, tag, source commit, gate status, and GitHub CI evidence boundary.
+
 Next implementation direction:
 
-Release Ledger Entry Verification Seed
+Checksum Generation Seed
 
 GitHub CI is public metadata, not CCL admission evidence.
 

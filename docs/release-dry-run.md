@@ -107,9 +107,14 @@ The dry-run checks that `schemas/ccl-release-manifest.schema.json` exists and pa
 The dry-run does not generate the final release manifest.
 The release manifest schema remains the future release authority for release packaging.
 
+## Relationship to Release Ledger Entry Verification
+
+The dry-run manifest is meant to be recorded in the project ledger and verified by [`docs/release-ledger-entry.md`](docs/release-ledger-entry.md).
+
+The ledger verifier binds the dry-run evidence to a matching ledger entry.
+
 ## Future Work
 
-- release ledger entry verification;
 - checksum generation;
 - release manifest generation;
 - release artifact generation;

@@ -1,5 +1,144 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Release Ledger Entry Verification Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: release ledger entry verification
+- Branch: feat/release-ledger-entry-verification-seed
+- PR: #41
+- Base main HEAD: 804afe19255dc375fa4cd45d55215a7d7f92fe8c
+
+### Basis
+
+- README.md
+- docs/release-dry-run.md
+- docs/release-ledger-entry.md
+- docs/release-manifest-schema.md
+- docs/versioning.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- crates/ccl-core/src/release_ledger.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/release_ledger.rs
+- docs/release-ledger-entry.md
+
+Edited:
+- README.md
+- docs/release-dry-run.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- release dry-run --version 0.1.0 --repo .`: PASS
+- `cargo run -p ccl-cli -- release ledger verify --version 0.1.0 --repo . --dry-run-manifest .ccl/runs/release-dry-run-1782109060798-5384/release-dry-run-manifest.json --ledger ledger/project-ledger.md`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Release Ledger Verification Proof
+
+- release ledger verify command added: YES
+- dry-run manifest parsed: YES
+- version/tag binding checked: YES
+- source commit binding checked: YES
+- entry-local ledger matching added: YES
+- local CCL gate status marker checked: YES
+- GitHub CI evidence marker checked: YES
+- release-ledger-verification manifest written: YES
+- tag created: NO
+- release artifacts created: NO
+- checksums generated: NO
+- GitHub Release created: NO
+- crates.io publish added: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- release created: NO
+- tag created: NO
+- artifacts generated: NO
+- checksums generated: NO
+- ledger binding verification added: YES
+- local CCL evidence remains authority: YES
+- GitHub CI remains metadata: YES
+
+### Warnings
+
+- This PR verifies release dry-run ledger entries only.
+- It does not create official releases.
+- It does not generate release artifacts.
+- It does not generate checksums.
+- Official release ledger semantics remain future work.
+- GitHub CI remains metadata, not evidence.
+
+### Next Gate
+
+- recommended next gate: Checksum Generation Seed
+- reason: after release intent, dry-run evidence, and ledger binding exist, CCL can add controlled checksum generation for future final artifact bytes.
+
+## 2026-06-22 — Release Dry-Run v0.1.0
+
+Status: PASS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: local release dry-run evidence
+- Branch: feat/release-ledger-entry-verification-seed
+- PR: #41
+- Base main HEAD: 804afe19255dc375fa4cd45d55215a7d7f92fe8c
+
+### Release Dry-Run Proof
+
+- Version: 0.1.0
+- Tag: v0.1.0
+- Source commit: f7475168e9fcc19a5c03a1001a8700f67934d9f5
+- Release dry-run manifest: .ccl/runs/release-dry-run-1782109060798-5384/release-dry-run-manifest.json
+- Local CCL gate status: PASS
+- GitHub CI used as evidence: NO
+- Tag created: NO
+- Release artifacts created: NO
+- Checksums generated: NO
+- GitHub Release created: NO
+- crates.io publish: NO
+
+### Boundary Conclusion
+
+- local CCL evidence created: YES
+- GitHub CI remains metadata: YES
+
 ## 2026-06-22 — Local Release Dry-Run Seed
 
 Status: PASS WITH WARNINGS
