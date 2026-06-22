@@ -24,6 +24,7 @@ Status: PASS WITH WARNINGS
 - schemas/ccl-release-manifest.schema.json
 - examples/ccl-admission-task-contract.json
 - examples/ccl-ci-metadata-task-contract.json
+- ci/common.sh
 - crates/ccl-core/src/gate.rs
 - crates/ccl-core/src/lib.rs
 - crates/ccl-core/src/release.rs
@@ -39,7 +40,9 @@ Edited:
 - README.md
 - docs/roadmap.md
 - ledger/project-ledger.md
+- ci/common.sh
 - crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/release.rs
 - crates/ccl-cli/src/main.rs
 
 Deleted:
@@ -64,11 +67,11 @@ Deleted:
 - `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
 - `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
 - `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\ci\admission.ps1 --full`: PASS
 - `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
 - `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
 - `cargo run -p ccl-cli -- release dry-run --version 0.1.0 --repo .`: PASS
 - `bash scripts/demo.sh`: PASS
-- `CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json bash scripts/demo.sh`: PASS
 - `cargo clippy --all-targets --all-features -- -D warnings`: PASS
 - GitHub CI used as evidence: NO
 
@@ -88,6 +91,7 @@ Deleted:
 - GitHub Release created: NO
 - crates.io publish added: NO
 - GitHub CI used as evidence: NO
+- local admission compatibility fix added: YES
 
 ### Boundary Conclusion
 
@@ -105,6 +109,7 @@ Deleted:
 - No release artifacts are generated.
 - No checksum generation is implemented.
 - Release ledger entry verification remains future work.
+- Local admission compatibility fix was needed for PowerShell command resolution.
 - GitHub CI remains metadata, not evidence.
 
 ### Next Gate
