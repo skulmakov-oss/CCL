@@ -386,7 +386,7 @@ fn main() {
                 contract_path: contract.clone(),
             }) {
                 Ok(outcome) => {
-                    print_release_dry_run(&outcome, &version, &repo);
+                    print_release_dry_run(&outcome, version, repo);
                     std::process::exit(release_exit_code(&outcome.status));
                 }
                 Err(err) => {
