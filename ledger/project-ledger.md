@@ -1,5 +1,36 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Release Dry-Run v0.1.0
+
+Status: PASS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: local release dry-run evidence
+- Branch: feat/release-manifest-dry-assembly-seed
+- PR: #43
+- Base main HEAD: 222557c56c011734d1d16fad99d1cad7d5c04d99
+
+### Release Dry-Run Proof
+
+- Version: 0.1.0
+- Tag: v0.1.0
+- Source commit: bb5a27e1bc096e475dd8d069ec6a7af10bc30cc3
+- Release dry-run manifest: .ccl/runs/release-dry-run-1782146027655-5132/release-dry-run-manifest.json
+- Local CCL gate status: PASS
+- GitHub CI used as evidence: NO
+- Tag created: NO
+- Release artifacts created: NO
+- Checksums generated: NO
+- GitHub Release created: NO
+- crates.io publish: NO
+
+### Boundary Conclusion
+
+- local CCL evidence created: YES
+- GitHub CI remains metadata: YES
+
 ## 2026-06-22 — Release Manifest Dry Assembly Seed
 
 Status: PASS WITH WARNINGS
@@ -49,8 +80,9 @@ Deleted:
 - `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
 - `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
 - `cargo run -p ccl-cli -- release dry-run --version 0.1.0 --repo .`: PASS
+- `cargo run -p ccl-cli -- release ledger verify --version 0.1.0 --repo . --dry-run-manifest .ccl/runs/release-dry-run-1782146027655-5132/release-dry-run-manifest.json --ledger ledger/project-ledger.md`: PASS
 - `cargo run -p ccl-cli -- release checksum --version 0.1.0 --repo . --input README.md --input docs/release-dry-run.md`: PASS
-- `cargo run -p ccl-cli -- release manifest dry-assemble --version 0.1.0 --repo . --dry-run-manifest <path> --ledger-verification-manifest <path> --checksum-manifest <path>`: PASS
+- `cargo run -p ccl-cli -- release manifest dry-assemble --version 0.1.0 --repo . --dry-run-manifest .ccl/runs/release-dry-run-1782146027655-5132/release-dry-run-manifest.json --ledger-verification-manifest .ccl/runs/release-ledger-1782146364719-33176/release-ledger-verification-manifest.json --checksum-manifest .ccl/runs/release-checksum-1782146368563-2848/release-checksum-manifest.json`: PASS
 - `cargo clippy --all-targets --all-features -- -D warnings`: PASS
 - GitHub CI used as evidence: NO
 
