@@ -5,6 +5,7 @@ use ccl_core::gate::{self, GateRunRequest};
 use ccl_core::ledger as ledger_core;
 use ccl_core::preflight;
 use ccl_core::release;
+use ccl_core::release_checksum;
 use ccl_core::release_ledger;
 use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
@@ -146,6 +147,14 @@ enum ReleaseCommands {
         repo: PathBuf,
         #[arg(long, default_value = "examples/ccl-admission-task-contract.json")]
         contract: PathBuf,
+    },
+    Checksum {
+        #[arg(long)]
+        version: String,
+        #[arg(long)]
+        repo: PathBuf,
+        #[arg(long = "input", value_name = "FILE")]
+        inputs: Vec<PathBuf>,
     },
     Ledger {
         #[command(subcommand)]
@@ -415,6 +424,21 @@ fn main() {
                     std::process::exit(40);
                 }
             },
+            ReleaseCommands::Checksum {
+                version,
+                repo,
+                inputs,
+            } => {
+                let outcome = release_checksum::run_release_checksum(
+                    release_checksum::ReleaseChecksumRequest {
+                        repo: repo.clone(),
+                        version: version.clone(),
+                        inputs: inputs.clone(),
+                    },
+                );
+                print_release_checksum(&outcome, version, repo, inputs.len());
+                std::process::exit(release_checksum_exit_code(&outcome.status));
+            }
             ReleaseCommands::Ledger { action } => match action {
                 ReleaseLedgerCommands::Verify {
                     version,
@@ -893,6 +917,46 @@ fn print_release_dry_run(outcome: &release::ReleaseDryRunOutcome, version: &str,
     }
 }
 
+fn print_release_checksum(
+    outcome: &release_checksum::ReleaseChecksumOutcome,
+    version: &str,
+    repo: &Path,
+    input_count: usize,
+) {
+    println!("CCL Release Checksum Summary");
+    println!("============================");
+    println!();
+    println!("Status: {}", outcome.status);
+    println!("Version: {}", version);
+    println!("Tag: v{}", version);
+    println!("Repo: {}", repo.display());
+    println!("Source commit: {}", outcome.manifest.source_commit);
+    println!("Inputs: {}", input_count);
+    println!("Algorithm: {}", outcome.manifest.algorithm);
+    println!("Manifest: {}", outcome.manifest_path);
+    println!();
+    println!("Side effects:");
+    println!("- Tag created: NO");
+    println!("- Release artifacts created: NO");
+    println!("- GitHub Release created: NO");
+    println!("- crates.io publish: NO");
+    println!("- GitHub CI used as evidence: NO");
+    if !outcome.manifest.warnings.is_empty() {
+        println!();
+        println!("Warnings:");
+        for warning in &outcome.manifest.warnings {
+            println!("- {}", warning);
+        }
+    }
+    if !outcome.manifest.violations.is_empty() {
+        println!();
+        println!("Violations:");
+        for violation in &outcome.manifest.violations {
+            println!("- {}", violation);
+        }
+    }
+}
+
 fn print_release_ledger_verification(
     outcome: &release_ledger::ReleaseLedgerVerificationOutcome,
     version: &str,
@@ -991,6 +1055,15 @@ fn release_exit_code(status: &release::ReleaseDryRunStatus) -> i32 {
         release::ReleaseDryRunStatus::PassWithWarnings => 10,
         release::ReleaseDryRunStatus::Fail => 20,
         release::ReleaseDryRunStatus::ContractFail => 30,
+    }
+}
+
+fn release_checksum_exit_code(status: &release_checksum::ReleaseChecksumStatus) -> i32 {
+    match status {
+        release_checksum::ReleaseChecksumStatus::Pass => 0,
+        release_checksum::ReleaseChecksumStatus::PassWithWarnings => 10,
+        release_checksum::ReleaseChecksumStatus::Fail => 20,
+        release_checksum::ReleaseChecksumStatus::ContractFail => 30,
     }
 }
 
