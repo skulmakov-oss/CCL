@@ -199,6 +199,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/release-dry-run.md`](docs/release-dry-run.md) — local release dry-run command, evidence manifest, and non-publishing boundaries.
 - [`docs/release-ledger-entry.md`](docs/release-ledger-entry.md) — deterministic release dry-run ledger entry verification and evidence binding.
 - [`docs/release-checksums.md`](docs/release-checksums.md) — local SHA-256 checksum generation for explicitly selected release-readiness files.
+- [`docs/release-manifest-dry-assembly.md`](docs/release-manifest-dry-assembly.md) — local dry release manifest assembly from dry-run, ledger verification, and checksum evidence.
 - [`schemas/ccl-release-manifest.schema.json`](schemas/ccl-release-manifest.schema.json) — machine-readable future release manifest JSON Schema.
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — public CI metadata workflow.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
@@ -347,6 +348,22 @@ cargo run -p ccl-cli -- release checksum `
 
 The command writes a local checksum manifest under `.ccl/runs/**`.
 It does not create tags, release artifacts, GitHub Releases, or crates.io publications.
+
+## Release Manifest Dry Assembly
+
+CCL can assemble a local dry release manifest from release dry-run, release ledger verification, and checksum evidence.
+
+```powershell
+cargo run -p ccl-cli -- release manifest dry-assemble `
+  --version 0.1.0 `
+  --repo . `
+  --dry-run-manifest .ccl/runs/<dry-run-id>/release-dry-run-manifest.json `
+  --ledger-verification-manifest .ccl/runs/<ledger-id>/release-ledger-verification-manifest.json `
+  --checksum-manifest .ccl/runs/<checksum-id>/release-checksum-manifest.json
+```
+
+This writes a dry release manifest under `.ccl/runs/**`.
+It does not create tags, official release artifacts, GitHub Releases, or crates.io publications.
 
 Current capture layer already supports:
 

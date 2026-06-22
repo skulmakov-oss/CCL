@@ -118,9 +118,11 @@ Release Ledger Entry Verification Seed binds a release dry-run manifest to an en
 
 Checksum Generation Seed adds controlled local SHA-256 checksum generation for explicitly selected files and writes checksum evidence under `.ccl/runs/**` without creating tags, artifacts, GitHub Releases, or publications.
 
+Release Manifest Dry Assembly Seed adds local assembly of a dry release manifest from release dry-run evidence, release ledger verification evidence, and checksum evidence without creating tags, artifacts, GitHub Releases, or publications.
+
 Next implementation direction:
 
-Release Manifest Dry Assembly Seed
+Release Candidate Decision Seed
 
 GitHub CI is public metadata, not CCL admission evidence.
 

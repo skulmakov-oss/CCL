@@ -1,5 +1,132 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Release Dry-Run v0.1.0
+
+Status: PASS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: local release dry-run evidence
+- Branch: feat/release-manifest-dry-assembly-seed
+- PR: #43
+- Base main HEAD: 222557c56c011734d1d16fad99d1cad7d5c04d99
+
+### Release Dry-Run Proof
+
+- Version: 0.1.0
+- Tag: v0.1.0
+- Source commit: bb5a27e1bc096e475dd8d069ec6a7af10bc30cc3
+- Release dry-run manifest: .ccl/runs/release-dry-run-1782146027655-5132/release-dry-run-manifest.json
+- Local CCL gate status: PASS
+- GitHub CI used as evidence: NO
+- Tag created: NO
+- Release artifacts created: NO
+- Checksums generated: NO
+- GitHub Release created: NO
+- crates.io publish: NO
+
+### Boundary Conclusion
+
+- local CCL evidence created: YES
+- GitHub CI remains metadata: YES
+
+## 2026-06-22 — Release Manifest Dry Assembly Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: release manifest dry assembly
+- Branch: feat/release-manifest-dry-assembly-seed
+- PR: #43
+- Base main HEAD: 222557c56c011734d1d16fad99d1cad7d5c04d99
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/release_manifest.rs
+- docs/release-manifest-dry-assembly.md
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- crates/ccl-core/src/lib.rs
+- crates/ccl-cli/src/main.rs
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- release dry-run --version 0.1.0 --repo .`: PASS
+- `cargo run -p ccl-cli -- release ledger verify --version 0.1.0 --repo . --dry-run-manifest .ccl/runs/release-dry-run-1782146027655-5132/release-dry-run-manifest.json --ledger ledger/project-ledger.md`: PASS
+- `cargo run -p ccl-cli -- release checksum --version 0.1.0 --repo . --input README.md --input docs/release-dry-run.md`: PASS
+- `cargo run -p ccl-cli -- release manifest dry-assemble --version 0.1.0 --repo . --dry-run-manifest .ccl/runs/release-dry-run-1782146027655-5132/release-dry-run-manifest.json --ledger-verification-manifest .ccl/runs/release-ledger-1782146364719-33176/release-ledger-verification-manifest.json --checksum-manifest .ccl/runs/release-checksum-1782146368563-2848/release-checksum-manifest.json`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Release Manifest Dry Assembly Proof
+
+- release manifest dry-assemble command added: YES
+- dry-run manifest parsed: YES
+- ledger verification manifest parsed: YES
+- checksum manifest parsed: YES
+- version/tag consistency checked: YES
+- source commit consistency checked: YES
+- checksum entries bound: YES
+- dry release manifest written: YES
+- tag created: NO
+- release artifacts created: NO
+- GitHub Release created: NO
+- crates.io publish added: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- dry release manifest assembled: YES
+- official release created: NO
+- tag created: NO
+- release artifacts generated: NO
+- GitHub Release created: NO
+- crates.io publish added: NO
+- local CCL evidence remains authority: YES
+- GitHub CI remains metadata: YES
+
+### Warnings
+
+- This PR assembles a dry release manifest only.
+- It does not create official release artifacts.
+- It does not make a release candidate decision.
+- It does not publish anything.
+- Release candidate decision remains future work.
+- GitHub CI remains metadata, not evidence.
+
+### Next Gate
+
+- recommended next gate: Release Candidate Decision Seed
+- reason: after dry release manifest assembly, CCL can produce a local release-candidate verdict without publishing.
+
 ## 2026-06-22 — Checksum Generation Seed
 
 Status: PASS WITH WARNINGS

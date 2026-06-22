@@ -50,7 +50,7 @@ impl ReleaseChecksumStatus {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ReleaseChecksumInput {
     pub path: String,
     pub size_bytes: u64,
