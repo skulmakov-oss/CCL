@@ -195,10 +195,13 @@ where
         }
     };
 
-    if source.tree_clean && schema.schema_file_present && schema.schema_json_valid {
-        if matches!(status, ReleaseDryRunStatus::Pass) && !warnings.is_empty() {
-            status = ReleaseDryRunStatus::PassWithWarnings;
-        }
+    if source.tree_clean
+        && schema.schema_file_present
+        && schema.schema_json_valid
+        && matches!(status, ReleaseDryRunStatus::Pass)
+        && !warnings.is_empty()
+    {
+        status = ReleaseDryRunStatus::PassWithWarnings;
     }
 
     let manifest = ReleaseDryRunManifest {

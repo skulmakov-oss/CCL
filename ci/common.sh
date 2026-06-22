@@ -14,6 +14,24 @@ ps_quote() {
   printf "'%s'" "$value"
 }
 
+to_windows_path() {
+  local value="$1"
+
+  case "$value" in
+    [A-Za-z]:\\*|[A-Za-z]:/*|*\\*)
+      printf '%s\n' "$value"
+      return 0
+      ;;
+  esac
+
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$value"
+    return $?
+  fi
+
+  printf '%s\n' "$value"
+}
+
 resolve_tool() {
   local tool="$1"
   local resolved=""
@@ -57,13 +75,15 @@ run_tool() {
         *)
           if command -v powershell.exe >/dev/null 2>&1; then
             local ps_command=""
+            local ps_tool_path
+            ps_tool_path="$(to_windows_path "$tool_path")"
             if [ -n "${CARGO_INCREMENTAL:-}" ]; then
               ps_command+="\$env:CARGO_INCREMENTAL = $(ps_quote "$CARGO_INCREMENTAL"); "
             fi
             if [ -n "${CARGO_TARGET_DIR:-}" ]; then
-              ps_command+="\$env:CARGO_TARGET_DIR = $(ps_quote "$CARGO_TARGET_DIR"); "
+              ps_command+="\$env:CARGO_TARGET_DIR = $(ps_quote "$(to_windows_path "$CARGO_TARGET_DIR")"); "
             fi
-            ps_command+="& $(ps_quote "$tool_path")"
+            ps_command+="& $(ps_quote "$ps_tool_path")"
             local arg
             for arg in "$@"; do
               ps_command+=" $(ps_quote "$arg")"
@@ -77,13 +97,15 @@ run_tool() {
     [A-Za-z]:\\*|[A-Za-z]:/*|*\\*)
       if command -v powershell.exe >/dev/null 2>&1; then
         local ps_command=""
+        local ps_tool_path
+        ps_tool_path="$(to_windows_path "$tool_path")"
         if [ -n "${CARGO_INCREMENTAL:-}" ]; then
           ps_command+="\$env:CARGO_INCREMENTAL = $(ps_quote "$CARGO_INCREMENTAL"); "
         fi
         if [ -n "${CARGO_TARGET_DIR:-}" ]; then
-          ps_command+="\$env:CARGO_TARGET_DIR = $(ps_quote "$CARGO_TARGET_DIR"); "
+          ps_command+="\$env:CARGO_TARGET_DIR = $(ps_quote "$(to_windows_path "$CARGO_TARGET_DIR")"); "
         fi
-        ps_command+="& $(ps_quote "$tool_path")"
+        ps_command+="& $(ps_quote "$ps_tool_path")"
         local arg
         for arg in "$@"; do
           ps_command+=" $(ps_quote "$arg")"
