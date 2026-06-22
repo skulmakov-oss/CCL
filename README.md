@@ -1,3 +1,5 @@
+![Uploading 74736eee-65e9-4647-aa5b-aacf96d0cf14.png…]()
+
 <p align="center">
   <h1 align="center">CCL</h1>
   <p align="center"><strong>Cerebral Control Layer</strong></p>
