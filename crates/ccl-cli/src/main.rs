@@ -5,6 +5,7 @@ use ccl_core::gate::{self, GateRunRequest};
 use ccl_core::ledger as ledger_core;
 use ccl_core::preflight;
 use ccl_core::release;
+use ccl_core::release_ledger;
 use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
 use ccl_core::validation_runner::{self, ValidationRunManifest, ValidationRunStatus};
@@ -145,6 +146,26 @@ enum ReleaseCommands {
         repo: PathBuf,
         #[arg(long, default_value = "examples/ccl-admission-task-contract.json")]
         contract: PathBuf,
+    },
+    Ledger {
+        #[command(subcommand)]
+        action: ReleaseLedgerCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum ReleaseLedgerCommands {
+    Verify {
+        #[arg(long)]
+        version: String,
+        #[arg(long)]
+        repo: PathBuf,
+        #[arg(long, value_name = "PATH")]
+        dry_run_manifest: PathBuf,
+        #[arg(long, default_value = "ledger/project-ledger.md")]
+        ledger: PathBuf,
+        #[arg(long)]
+        entry_heading: Option<String>,
     },
 }
 
@@ -392,6 +413,40 @@ fn main() {
                 Err(err) => {
                     eprintln!("Release dry-run error: {}", err);
                     std::process::exit(40);
+                }
+            },
+            ReleaseCommands::Ledger { action } => match action {
+                ReleaseLedgerCommands::Verify {
+                    version,
+                    repo,
+                    dry_run_manifest,
+                    ledger,
+                    entry_heading,
+                } => {
+                    match release_ledger::run_release_ledger_verification(
+                        release_ledger::ReleaseLedgerVerificationRequest {
+                            repo: repo.clone(),
+                            version: version.clone(),
+                            dry_run_manifest_path: dry_run_manifest.clone(),
+                            ledger_path: ledger.clone(),
+                            entry_heading: entry_heading.clone(),
+                        },
+                    ) {
+                        Ok(outcome) => {
+                            print_release_ledger_verification(
+                                &outcome,
+                                version,
+                                repo,
+                                dry_run_manifest,
+                                ledger,
+                            );
+                            std::process::exit(release_ledger_exit_code(&outcome.status));
+                        }
+                        Err(err) => {
+                            eprintln!("Release ledger verification error: {}", err);
+                            std::process::exit(40);
+                        }
+                    }
                 }
             },
         },
@@ -838,6 +893,50 @@ fn print_release_dry_run(outcome: &release::ReleaseDryRunOutcome, version: &str,
     }
 }
 
+fn print_release_ledger_verification(
+    outcome: &release_ledger::ReleaseLedgerVerificationOutcome,
+    version: &str,
+    repo: &Path,
+    dry_run_manifest: &Path,
+    ledger: &Path,
+) {
+    println!("CCL Release Ledger Verification Summary");
+    println!("=======================================");
+    println!();
+    println!("Status: {}", outcome.status);
+    println!("Version: {}", version);
+    println!("Tag: v{}", version);
+    println!("Repo: {}", repo.display());
+    println!("Ledger: {}", ledger.display());
+    println!("Dry-run manifest: {}", dry_run_manifest.display());
+    println!("Matched entry: {}", outcome.manifest.matched_entry_heading);
+    println!("Source commit: {}", outcome.manifest.source_commit);
+    println!("Gate status: {}", outcome.manifest.gate_status);
+    println!("GitHub CI used as evidence: NO");
+    println!("Manifest: {}", outcome.manifest_path);
+    if !outcome.manifest.required_markers.is_empty() {
+        println!();
+        println!("Required markers:");
+        for marker in &outcome.manifest.required_markers {
+            println!("- {}", marker);
+        }
+    }
+    if !outcome.manifest.warnings.is_empty() {
+        println!();
+        println!("Warnings:");
+        for warning in &outcome.manifest.warnings {
+            println!("- {}", warning);
+        }
+    }
+    if !outcome.manifest.violations.is_empty() {
+        println!();
+        println!("Violations:");
+        for violation in &outcome.manifest.violations {
+            println!("- {}", violation);
+        }
+    }
+}
+
 fn print_ledger_verification(
     manifest: &ledger_core::LedgerVerificationManifest,
     contract: &Path,
@@ -892,6 +991,15 @@ fn release_exit_code(status: &release::ReleaseDryRunStatus) -> i32 {
         release::ReleaseDryRunStatus::PassWithWarnings => 10,
         release::ReleaseDryRunStatus::Fail => 20,
         release::ReleaseDryRunStatus::ContractFail => 30,
+    }
+}
+
+fn release_ledger_exit_code(status: &release_ledger::ReleaseLedgerVerificationStatus) -> i32 {
+    match status {
+        release_ledger::ReleaseLedgerVerificationStatus::Pass => 0,
+        release_ledger::ReleaseLedgerVerificationStatus::PassWithWarnings => 10,
+        release_ledger::ReleaseLedgerVerificationStatus::Fail => 20,
+        release_ledger::ReleaseLedgerVerificationStatus::ContractFail => 30,
     }
 }
 

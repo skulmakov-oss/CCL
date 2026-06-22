@@ -197,6 +197,7 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/versioning.md`](docs/versioning.md) — future version and Git tag policy for CCL releases.
 - [`docs/release-manifest-schema.md`](docs/release-manifest-schema.md) — future release manifest schema, evidence binding, and validation responsibilities.
 - [`docs/release-dry-run.md`](docs/release-dry-run.md) — local release dry-run command, evidence manifest, and non-publishing boundaries.
+- [`docs/release-ledger-entry.md`](docs/release-ledger-entry.md) — deterministic release dry-run ledger entry verification and evidence binding.
 - [`schemas/ccl-release-manifest.schema.json`](schemas/ccl-release-manifest.schema.json) — machine-readable future release manifest JSON Schema.
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — public CI metadata workflow.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
@@ -315,6 +316,21 @@ The dry-run writes local evidence under `.ccl/runs/**`.
 It does not create tags, artifacts, checksums, GitHub Releases, or crates.io publications.
 
 See [`docs/release-dry-run.md`](docs/release-dry-run.md).
+
+## Release Ledger Entry Verification
+
+CCL can verify that a local release dry-run is recorded in the project ledger.
+
+```powershell
+cargo run -p ccl-cli -- release ledger verify `
+  --version 0.1.0 `
+  --repo . `
+  --dry-run-manifest .ccl/runs/release-dry-run-1782109060798-5384/release-dry-run-manifest.json `
+  --ledger ledger/project-ledger.md
+```
+
+This verification binds version, tag, source commit, dry-run evidence, local gate status, and the `GitHub CI used as evidence: NO` boundary.
+It does not create a release.
 
 Current capture layer already supports:
 
