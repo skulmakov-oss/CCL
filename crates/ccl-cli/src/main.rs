@@ -4,6 +4,7 @@ use ccl_core::evidence::{CapturePolicy, CaptureRequest, CommandSpec};
 use ccl_core::gate::{self, GateRunRequest};
 use ccl_core::ledger as ledger_core;
 use ccl_core::preflight;
+use ccl_core::release;
 use ccl_core::scope::{self, ScopeCheckStatus};
 use ccl_core::task_contract::TaskContract;
 use ccl_core::validation_runner::{self, ValidationRunManifest, ValidationRunStatus};
@@ -70,6 +71,11 @@ enum Commands {
         #[command(subcommand)]
         action: LedgerCommands,
     },
+    /// Run a local release dry-run
+    Release {
+        #[command(subcommand)]
+        action: ReleaseCommands,
+    },
     /// Run the full gate orchestration
     Gate {
         #[command(subcommand)]
@@ -127,6 +133,18 @@ enum LedgerCommands {
         repo: PathBuf,
         #[arg(long, default_value = "ledger/project-ledger.md")]
         ledger: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+enum ReleaseCommands {
+    DryRun {
+        #[arg(long)]
+        version: String,
+        #[arg(long)]
+        repo: PathBuf,
+        #[arg(long, default_value = "examples/ccl-admission-task-contract.json")]
+        contract: PathBuf,
     },
 }
 
@@ -356,6 +374,26 @@ fn main() {
                     }
                 }
             }
+        },
+        Some(Commands::Release { action }) => match action {
+            ReleaseCommands::DryRun {
+                version,
+                repo,
+                contract,
+            } => match release::run_release_dry_run(release::ReleaseDryRunRequest {
+                repo: repo.clone(),
+                version: version.clone(),
+                contract_path: contract.clone(),
+            }) {
+                Ok(outcome) => {
+                    print_release_dry_run(&outcome, version, repo);
+                    std::process::exit(release_exit_code(&outcome.status));
+                }
+                Err(err) => {
+                    eprintln!("Release dry-run error: {}", err);
+                    std::process::exit(40);
+                }
+            },
         },
         Some(Commands::Gate { action }) => match action {
             GateCommands::Run {
@@ -693,6 +731,113 @@ fn print_gate_run(
     println!("GitHub CI used as evidence: NO");
 }
 
+fn print_release_dry_run(outcome: &release::ReleaseDryRunOutcome, version: &str, repo: &Path) {
+    println!("CCL Release Dry-Run Summary");
+    println!("============================");
+    println!();
+    println!("Status: {}", outcome.status);
+    println!("Version: {}", version);
+    println!("Tag: {}", outcome.manifest.tag);
+    println!("Repo: {}", repo.display());
+    println!("Gate status: {}", outcome.manifest.gate.gate_status);
+    println!("Tree clean: {}", outcome.manifest.source.tree_clean);
+    println!(
+        "Schema present: {}",
+        outcome.manifest.schema.schema_file_present
+    );
+    println!(
+        "Schema JSON valid: {}",
+        outcome.manifest.schema.schema_json_valid
+    );
+    println!("Manifest: {}", outcome.manifest_path);
+    println!();
+    println!("Dry-run only:");
+    println!(
+        "- tag created: {}",
+        if outcome.manifest.policy.tag_created {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!(
+        "- artifacts created: {}",
+        if outcome.manifest.policy.artifacts_created {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!(
+        "- checksums generated: {}",
+        if outcome.manifest.policy.checksums_generated {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!(
+        "- GitHub Release created: {}",
+        if outcome.manifest.policy.github_release_created {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!(
+        "- crates.io publish: {}",
+        if outcome.manifest.policy.crates_io_published {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!(
+        "- GitHub CI used as evidence: {}",
+        if outcome.manifest.policy.github_ci_used_as_evidence {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!();
+    println!("Local CCL gate requirement:");
+    println!(
+        "- release entry required for real release: {}",
+        if outcome
+            .manifest
+            .ledger
+            .release_entry_required_for_real_release
+        {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    println!(
+        "- dry-run entry recorded: {}",
+        if outcome.manifest.ledger.dry_run_entry_recorded {
+            "YES"
+        } else {
+            "NO"
+        }
+    );
+    if !outcome.manifest.warnings.is_empty() {
+        println!();
+        println!("Warnings:");
+        for warning in &outcome.manifest.warnings {
+            println!("- {}", warning);
+        }
+    }
+    if !outcome.manifest.violations.is_empty() {
+        println!();
+        println!("Violations:");
+        for violation in &outcome.manifest.violations {
+            println!("- {}", violation);
+        }
+    }
+}
+
 fn print_ledger_verification(
     manifest: &ledger_core::LedgerVerificationManifest,
     contract: &Path,
@@ -739,6 +884,15 @@ fn print_ledger_verification(
     println!("{}", manifest_path);
     println!();
     println!("GitHub CI used as evidence: NO");
+}
+
+fn release_exit_code(status: &release::ReleaseDryRunStatus) -> i32 {
+    match status {
+        release::ReleaseDryRunStatus::Pass => 0,
+        release::ReleaseDryRunStatus::PassWithWarnings => 10,
+        release::ReleaseDryRunStatus::Fail => 20,
+        release::ReleaseDryRunStatus::ContractFail => 30,
+    }
 }
 
 fn admission_exit_code(status: &AdmissionStatus) -> i32 {

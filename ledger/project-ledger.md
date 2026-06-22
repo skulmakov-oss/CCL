@@ -1,5 +1,122 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Local Release Dry-Run Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: local release dry-run
+- Branch: feat/local-release-dry-run-seed
+- PR: #28
+- Base main HEAD: 7ed8f848f07103ff0bf643e624646ef69689ae7b
+
+### Basis
+
+- README.md
+- docs/release-artifacts.md
+- docs/versioning.md
+- docs/release-manifest-schema.md
+- docs/release-dry-run.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- schemas/ccl-release-manifest.schema.json
+- examples/ccl-admission-task-contract.json
+- examples/ccl-ci-metadata-task-contract.json
+- ci/common.sh
+- crates/ccl-core/src/gate.rs
+- crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/release.rs
+- crates/ccl-cli/src/main.rs
+
+### Changed Files
+
+Created:
+- crates/ccl-core/src/release.rs
+- docs/release-dry-run.md
+
+Edited:
+- README.md
+- docs/roadmap.md
+- ledger/project-ledger.md
+- ci/common.sh
+- crates/ccl-core/src/lib.rs
+- crates/ccl-core/src/release.rs
+- crates/ccl-cli/src/main.rs
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `python -m json.tool schemas/ccl-release-manifest.schema.json`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `powershell -ExecutionPolicy Bypass -File .\ci\admission.ps1 --full`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- release dry-run --version 0.1.0 --repo .`: PASS
+- `bash scripts/demo.sh`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Release Dry-Run Proof
+
+- release dry-run command added: YES
+- version format validated: YES
+- tag derived and validated: YES
+- clean tree checked: YES
+- release schema file checked: YES
+- release schema JSON parsed: YES
+- local CCL gate invoked: YES
+- release dry-run manifest written: YES
+- tag created: NO
+- release artifacts created: NO
+- checksums generated: NO
+- GitHub Release created: NO
+- crates.io publish added: NO
+- GitHub CI used as evidence: NO
+- local admission compatibility fix added: YES
+
+### Boundary Conclusion
+
+- release created: NO
+- tag created: NO
+- artifacts generated: NO
+- checksums generated: NO
+- local CCL evidence created: YES
+- GitHub CI remains metadata: YES
+
+### Warnings
+
+- This PR adds a dry-run only.
+- No real release is created.
+- No release artifacts are generated.
+- No checksum generation is implemented.
+- Release ledger entry verification remains future work.
+- Local admission compatibility fix was needed for PowerShell command resolution.
+- GitHub CI remains metadata, not evidence.
+
+### Next Gate
+
+- recommended next gate: Release Ledger Entry Verification Seed
+- reason: before checksum generation becomes meaningful, release dry-run should verify release ledger entry requirements deterministically.
+
 ## 2026-06-22 — Release Manifest Schema Seed
 
 Status: PASS WITH WARNINGS

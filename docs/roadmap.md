@@ -112,9 +112,11 @@ Version / Tag Policy Seed defines future SemVer-compatible versioning, `vMAJOR.M
 
 Release Manifest Schema Seed defines a future machine-readable manifest schema binding version, tag, source commit, artifacts, checksums, local CCL evidence, ledger entry, and GitHub CI metadata boundary.
 
+Local Release Dry-Run Seed adds a local release-intent check that validates version and tag shape, clean tree state, schema availability, and local CCL gate status without creating tags, artifacts, checksums, or releases.
+
 Next implementation direction:
 
-Local Release Dry-Run Seed
+Release Ledger Entry Verification Seed
 
 GitHub CI is public metadata, not CCL admission evidence.
 
