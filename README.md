@@ -193,6 +193,8 @@ The full project doctrine is maintained in [`CCL_DNA.md`](CCL_DNA.md).
 - [`docs/install.md`](docs/install.md) — source install, build, verification, and release-readiness notes.
 - [`docs/release-artifacts.md`](docs/release-artifacts.md) — future release artifact, checksum, manifest, and evidence design.
 - [`docs/versioning.md`](docs/versioning.md) — future version and Git tag policy for CCL releases.
+- [`docs/release-manifest-schema.md`](docs/release-manifest-schema.md) — future release manifest schema, evidence binding, and validation responsibilities.
+- [`schemas/ccl-release-manifest.schema.json`](schemas/ccl-release-manifest.schema.json) — machine-readable future release manifest JSON Schema.
 - [`.github/workflows/ci.yml`](.github/workflows/ci.yml) — public CI metadata workflow.
 - [`docs/demo.md`](docs/demo.md) — local demo instructions and proof boundary.
 - [`scripts/demo.ps1`](scripts/demo.ps1) — repeatable PowerShell demo script.
@@ -237,7 +239,7 @@ Current implemented direction:
 Next implementation direction:
 
 ```text
-Real AI-Agent Task Contract Examples Seed
+Local Release Dry-Run Seed
 ```
 
 ## AI-Agent Task Examples
@@ -289,6 +291,14 @@ CCL does not yet publish official release tags.
 The future version and tag policy is documented in [`docs/versioning.md`](docs/versioning.md).
 
 Release tags will require local CCL evidence. GitHub CI remains public metadata, not release evidence.
+
+## Release Manifest Schema
+
+CCL does not yet generate official release manifests.
+
+The future release manifest schema is documented in [`docs/release-manifest-schema.md`](docs/release-manifest-schema.md), with a machine-readable draft at [`schemas/ccl-release-manifest.schema.json`](schemas/ccl-release-manifest.schema.json).
+
+A manifest will require local CCL evidence. GitHub CI remains public metadata, not release evidence.
 
 Current capture layer already supports:
 

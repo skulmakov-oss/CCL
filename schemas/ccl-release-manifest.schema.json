@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/skulmakov-oss/CCL/schemas/ccl-release-manifest.schema.json",
+  "title": "CCL Release Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project",
+    "version",
+    "tag",
+    "source",
+    "artifacts",
+    "checksums",
+    "evidence",
+    "ledger",
+    "ci_metadata",
+    "created_unix_ms"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "project": {
+      "type": "string",
+      "const": "CCL"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "tag": {
+      "type": "string",
+      "pattern": "^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "ref",
+        "tree_clean"
+      ],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "ref": {
+          "type": "string",
+          "pattern": "^refs/tags/v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+        },
+        "tree_clean": {
+          "type": "boolean",
+          "const": true
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "kind",
+          "platform",
+          "path",
+          "sha256",
+          "size_bytes"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "source_archive",
+              "binary_archive",
+              "release_notes",
+              "checksum_file",
+              "manifest"
+            ]
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "source",
+              "windows-x86_64",
+              "linux-x86_64",
+              "macos-x86_64",
+              "macos-aarch64",
+              "portable"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*\\.\\.)[^\\0]+$"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "checksums": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "entries"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "const": "sha256"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "artifact_name",
+              "sha256"
+            ],
+            "properties": {
+              "artifact_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "local_ccl_gate_status",
+        "gate_manifest",
+        "validation_manifest",
+        "scope_manifest",
+        "ledger_manifest",
+        "admission_verdict"
+      ],
+      "properties": {
+        "local_ccl_gate_status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "PASS_WITH_WARNINGS",
+            "FAIL",
+            "CONTRACT_FAIL"
+          ]
+        },
+        "gate_manifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_manifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "scope_manifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ledger_manifest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "admission_verdict": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_required",
+        "entry_heading"
+      ],
+      "properties": {
+        "entry_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "entry_heading": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ci_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_ci_checked",
+        "github_ci_status",
+        "github_ci_used_as_evidence"
+      ],
+      "properties": {
+        "github_ci_checked": {
+          "type": "boolean"
+        },
+        "github_ci_status": {
+          "type": "string",
+          "enum": [
+            "PASS",
+            "PASS_WITH_WARNINGS",
+            "FAIL",
+            "NOT_CHECKED"
+          ]
+        },
+        "github_ci_used_as_evidence": {
+          "type": "boolean",
+          "const": false
+        }
+      }
+    },
+    "created_unix_ms": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

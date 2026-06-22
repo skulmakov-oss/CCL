@@ -110,9 +110,11 @@ Release Artifact Design Seed defines future distributable artifacts, checksums, 
 
 Version / Tag Policy Seed defines future SemVer-compatible versioning, `vMAJOR.MINOR.PATCH` tag rules, tag eligibility, dirty-tree restrictions, and evidence requirements before tagging.
 
+Release Manifest Schema Seed defines a future machine-readable manifest schema binding version, tag, source commit, artifacts, checksums, local CCL evidence, ledger entry, and GitHub CI metadata boundary.
+
 Next implementation direction:
 
-Release Manifest Schema Seed
+Local Release Dry-Run Seed
 
 GitHub CI is public metadata, not CCL admission evidence.
 
