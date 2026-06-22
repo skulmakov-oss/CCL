@@ -1,5 +1,112 @@
 # CCL Project Ledger
 
+## 2026-06-22 — Release Manifest Schema Seed
+
+Status: PASS WITH WARNINGS
+
+### Scope
+
+- Workstream: CCL Release Readiness
+- Task type: release manifest schema
+- Branch: docs/release-manifest-schema
+- PR: #27
+- Base main HEAD: dc7686e4e5e5413d272bc5fe5c73973a96b0fd1b
+
+### Basis
+
+- README.md
+- docs/release-artifacts.md
+- docs/versioning.md
+- docs/ci-metadata.md
+- docs/roadmap.md
+- examples/ccl-admission-task-contract.json
+- examples/ccl-ci-metadata-task-contract.json
+- ledger/project-ledger.md
+
+### Changed Files
+
+Created:
+- docs/release-manifest-schema.md
+- schemas/ccl-release-manifest.schema.json
+
+Edited:
+- README.md
+- docs/roadmap.md
+- examples/ccl-admission-task-contract.json
+- examples/ccl-ci-metadata-task-contract.json
+- ledger/project-ledger.md
+
+Deleted:
+- none
+
+### Validation
+
+- `git status --short --branch`: PASS
+- `git diff --check`: PASS
+- `python -m json.tool schemas/ccl-release-manifest.schema.json`: PASS
+- `cargo fmt --check`: PASS
+- `cargo test`: PASS
+- `cargo run -p ccl-cli -- --version`: PASS
+- `cargo run -p ccl-cli -- contract check examples/semantic-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-validation-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-scope-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-admission-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-env-policy-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/ccl-ci-metadata-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-docs-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-test-fix-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-refactor-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- contract check examples/agent-small-feature-task-contract.json`: PASS
+- `cargo run -p ccl-cli -- preflight --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-ci-metadata-task-contract.json --repo .`: PASS
+- `cargo run -p ccl-cli -- gate run --contract examples/ccl-admission-task-contract.json --repo . --verbose`: PASS
+- `bash scripts/demo.sh`: PASS
+- `CCL_DEMO_CONTRACT=examples/ccl-ci-metadata-task-contract.json bash scripts/demo.sh`: PASS
+- `cargo clippy --all-targets --all-features -- -D warnings`: PASS
+- GitHub CI used as evidence: NO
+
+### Release Manifest Schema Proof
+
+- release manifest schema doc added: YES
+- machine-readable JSON Schema added: YES
+- schema_version defined: YES
+- version/tag fields defined: YES
+- source commit binding defined: YES
+- artifact entry shape defined: YES
+- checksum shape defined: YES
+- local CCL evidence binding defined: YES
+- ledger binding defined: YES
+- GitHub CI metadata boundary defined: YES
+- manifest generator added: NO
+- release artifacts created: NO
+- checksums generated: NO
+- runtime behavior changed: NO
+- GitHub CI used as evidence: NO
+
+### Boundary Conclusion
+
+- release manifest generated: NO
+- release artifacts generated: NO
+- release validator implemented: NO
+- schema/design added: YES
+- local CCL evidence required in future manifests: YES
+- GitHub CI remains metadata: YES
+
+### Warnings
+
+- This PR adds schema and documentation only.
+- The schema does not prove artifact bytes exist.
+- The schema does not verify checksums.
+- The schema does not validate referenced evidence files.
+- Release dry-run validation remains future work.
+- GitHub CI remains metadata, not evidence.
+
+### Next Gate
+
+- recommended next gate: Local Release Dry-Run Seed
+- reason: after the manifest schema exists, CCL can design a dry-run release flow that validates release intent without publishing artifacts.
+
 ## 2026-06-22 — Version / Tag Policy Seed
 
 Status: PASS WITH WARNINGS
