@@ -108,9 +108,11 @@ Release Packaging / Install Notes Seed documents source installation, local veri
 
 Release Artifact Design Seed defines future distributable artifacts, checksums, release manifests, platform matrix, and evidence requirements without publishing artifacts.
 
+Version / Tag Policy Seed defines future SemVer-compatible versioning, `vMAJOR.MINOR.PATCH` tag rules, tag eligibility, dirty-tree restrictions, and evidence requirements before tagging.
+
 Next implementation direction:
 
-Version / Tag Policy Seed
+Release Manifest Schema Seed
 
 GitHub CI is public metadata, not CCL admission evidence.
 
